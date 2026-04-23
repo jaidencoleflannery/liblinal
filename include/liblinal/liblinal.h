@@ -7,7 +7,7 @@ typedef struct LA_Matrix_Size LA_Matrix_Size;
 
 typedef struct {
     int dimension;
-    double l2_norm;
+    float l2_norm;
     float *scalars; 
 } LA_Vector;
 
