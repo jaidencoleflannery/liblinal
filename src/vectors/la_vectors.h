@@ -3,12 +3,15 @@
 
 #include "../../include/liblinal/liblinal.h"
 
-LA_Vector *la_get_vector(int dimension, double *scalars);
+#define la_get_vector(scalars) _Generic((scalars), \
+        short *: la_get_vector_short, \
+        int *: la_get_vector_int, \
+        double *: la_get_vector_int, \
+
+LA_Vector *la_get_vector(int *scalars);
+
+LA_Vector *la_get_vector(double *scalars);
 
 double la_get_scalar(int component);
-
-double la_get_dimension()
-
-bool la_get_dimension
 
 #endif
