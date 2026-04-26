@@ -160,12 +160,15 @@ bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
 
-    for(int cursor = 0; cursor < v1->dimension; cursor++)
-        // don't scale epsilon for value size, we use it to avoid accuracy issues.
-        if(fabsf(v1_cursor[cursor] - v2_cursor[cursor]) > EPSILON) {
+    for(int cursor = 0; cursor < v1->dimension; cursor++) {
+        // floats only store ~6 trustworthy values, if the value grows too large we lose accuracy;
+        // epsilon has to be relative to size of diff to cover that :(
+        float diff = (fabsf(v1_cursor[cursor] - v2_cursor[cursor]));
+        if(diff > (EPSILON * diff)) {
             *result = false;
             return true;
         }
+    }
 
     *result = true;
     return true;
