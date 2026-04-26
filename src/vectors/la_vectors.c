@@ -8,7 +8,7 @@
 
 #define EPSILON 1e-6f
 
-static bool find_largest_scalar(float *scalars, int num_scalars, float *largest_scalar) {
+static bool find_largest_scalar(float *scalars, int dimension, float *largest_scalar) {
     if(scalars == NULL) {
         fprintf(stderr, "Provided scalars pointer was NULL.");
         return false;
@@ -19,18 +19,18 @@ static bool find_largest_scalar(float *scalars, int num_scalars, float *largest_
         return false;
     }
 
-    if(num_scalars < 0) {
-        fprintf(stderr, "Parameter num_scalars must be a positive integer.");
+    if(dimension <= 0) {
+        fprintf(stderr, "Parameter dimension must be a positive integer.");
         return false;
     }
 
     *largest_scalar = 0.0f;
-    for(int cursor = 0; cursor < num_scalars; cursor++)
-        if(*(scalars + cursor) > *largest_scalar)
-            *largest_scalar = *(scalars + cursor);
+    for(int cursor = 0; cursor < dimension; cursor++)
+        if(fabs(*(scalars + cursor)) > *largest_scalar)
+            *largest_scalar = fabs(*(scalars + cursor));
 
-    if(*largest_scalar <= 0.0f) {
-        fprintf(stderr, "Failed to find largest scalar, result was equal to, or less than 0.");
+    if(*largest_scalar < 0.0f) {
+        fprintf(stderr, "Failed to find largest scalar, result was less than 0.");
         return false;
     }
 
@@ -38,7 +38,7 @@ static bool find_largest_scalar(float *scalars, int num_scalars, float *largest_
 }
 
 bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
-    if(dimension < 0) {
+    if(dimension <= 0) {
         fprintf(stderr, "Dimension must be non-negative.");
         return false;
     }
@@ -54,7 +54,10 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     }
 
     float largest_scalar;
-    find_largest_scalar(scalars, &largest_scalar);
+    if(!find_largest_scalar(scalars, dimension, &largest_scalar)) {
+        fprintf(stderr, "Failed to find largest scalar.");
+        return false;
+    }
 
     *l2_result = 0.0f;
     float *scalar_cursor = scalars;
@@ -69,8 +72,8 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
         return true;
 
     // find the square root of the sum.
-    float seeker = (*l2_result / 2.0f);
-    while(fabs((seeker * seeker) - *l2_result) > (EPSILON * seeker)) {
+    float seeker = fabs(*l2_result / 2.0f);
+    while(fabs((seeker * seeker) - *l2_result) > EPSILON * seeker) {
         float result = (*l2_result / seeker);
         seeker = ((seeker + result) / 2);
     }
