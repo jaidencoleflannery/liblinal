@@ -1,4 +1,4 @@
-#include "../../include/liblinal/la_vectors.h"
+#include "../../include/liblinal/liblinal.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,8 +7,15 @@
 #include <string.h>
 
 #define EPSILON 1e-6f
+#define ADD true
+#define SUBTRACT false
 
-static bool find_largest_scalar(float *scalars, int dimension, float *largest_scalar) {
+static bool find_largest_scalar_absolute(int dimension, float *scalars, float *largest_scalar) {
+    if(dimension <= 0) {
+        fprintf(stderr, "The parameter dimension must be a positive integer.");
+        return false;
+    }
+
     if(scalars == NULL) {
         fprintf(stderr, "Provided scalars pointer was NULL.");
         return false;
@@ -17,12 +24,7 @@ static bool find_largest_scalar(float *scalars, int dimension, float *largest_sc
     if(largest_scalar == NULL) {
         fprintf(stderr, "Provided largest_scalar pointer was NULL.");
         return false;
-    }
-
-    if(dimension <= 0) {
-        fprintf(stderr, "Parameter dimension must be a positive integer.");
-        return false;
-    }
+    } 
 
     *largest_scalar = 0.0f;
     for(int cursor = 0; cursor < dimension; cursor++)
@@ -39,22 +41,24 @@ static bool find_largest_scalar(float *scalars, int dimension, float *largest_sc
 
 bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     if(dimension <= 0) {
-        fprintf(stderr, "Dimension must be non-negative.");
+        fprintf(stderr, "The parameter dimension must be a positive integer.");
         return false;
     }
-
-    if(l2_result == NULL) {
-        fprintf(stderr, "Provided l2_result pointer was NULL.");
-        return false;
-    } 
 
     if(scalars == NULL) {
         fprintf(stderr, "Provided scalars pointer was NULL.");
         return false;
     }
 
+    if(l2_result == NULL) {
+        fprintf(stderr, "Provided l2_result pointer was NULL.");
+        return false;
+    }
+    
+    // we divide all values by the largest scalar to _hopefully_ avoid overflow,
+    // at the end we scale the result back up by the same value so our result is the "same".
     float largest_scalar;
-    if(!find_largest_scalar(scalars, dimension, &largest_scalar)) {
+    if(!find_largest_scalar_absolute(dimension, scalars, &largest_scalar)) {
         fprintf(stderr, "Failed to find largest scalar.");
         return false;
     }
@@ -69,57 +73,101 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     }
 
     if(*l2_result == 0.0f)
-        return true;
+        return true; // save some compute for the other guy.
 
-    // find the square root of the sum.
+    // find the square root of the sum via heron's method.
     float seeker = fabs(*l2_result / 2.0f);
     while(fabs((seeker * seeker) - *l2_result) > EPSILON * seeker) {
         float result = (*l2_result / seeker);
         seeker = ((seeker + result) / 2);
     }
 
-    *l2_result = (seeker * largest_scalar);
+    
+    *l2_result = (seeker * largest_scalar); // scale back up.
 
     return true;
 }
 
-bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(v1->dimension != v2->dimension)
+static bool perform_arithmetic(LA_Vector *v1, LA_Vector *v2, bool is_addition, LA_Vector *result) {
+    if(v1 == NULL || v2 == NULL) {
+        fprintf(stderr, "One of the provided vector pointers was NULL.");
         return false;
+    }
+
+    if(v1->dimension != v2->dimension) {
+        fprintf(stderr, "Dimensions were of different sizes.");
+        return false;
+    }
+
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.");
+        return false;
+    }
 
     result->dimension = v1->dimension; 
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
 
-    result->scalars = (float *)malloc(v1->dimension * sizeof(float));
+    result->scalars = (float *)malloc(result->dimension * sizeof(float));
     if(result->scalars == NULL) {
         free(result->scalars);
         fprintf(stderr, "Failed to allocate memory.");
         return false;
     }
 
-    for(int cursor = 0; cursor < v1->dimension; cursor++)
-        result->scalars[cursor] = (v1_cursor[cursor] + v2_cursor[cursor]); 
+    for(int cursor = 0; cursor < v1->dimension; cursor++) {
+        result->scalars[cursor] = (is_addition)
+            ? (v1_cursor[cursor] + v2_cursor[cursor])
+            : (v1_cursor[cursor] - v2_cursor[cursor]);
+    }
 
-    double l2_norm;
+    float l2_norm;
     calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
     result->l2_norm = l2_norm;
 
     return true;
 }
 
-bool is_equal(LA_Vector *v1, LA_Vector *v2) {
-    if(v1->dimension != v2->dimension)
+bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+    if(!perform_arithmetic(v1, v2, ADD, result)) {
+        fprintf(stderr, "Failed to add vectors.");
         return false;
+    }
+    return true;
+}
+
+bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+    if(!perform_arithmetic(v1, v2, SUBTRACT, result)) {
+        fprintf(stderr, "Failed to subtract vectors.");
+        return false;
+    }
+    return true;
+}
+
+bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
+    if(v1 == NULL || v2 == NULL) {
+        fprintf(stderr, "One of the provided vector pointers was NULL.");
+        *result = false;
+        return false; // failure.
+    }
+
+    if(v1->dimension != v2->dimension) {
+        *result = false;
+        return true; // still successful.
+    }
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
 
     for(int cursor = 0; cursor < v1->dimension; cursor++)
-        if(fabsf(v1_cursor[cursor] - v2_cursor[cursor]) > EPSILON)
-            return false;
+        // don't scale epsilon for value size, we use it to avoid accuracy issues.
+        if(fabsf(v1_cursor[cursor] - v2_cursor[cursor]) > EPSILON) {
+            *result = false;
+            return true;
+        }
 
+    *result = true;
     return true;
 }
 
