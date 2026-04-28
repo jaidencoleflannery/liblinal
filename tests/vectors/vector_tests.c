@@ -32,9 +32,9 @@ static bool vector_tests_add_and_subtract_should_succeed(float epsilon) {
     float *v2_scalar = v2.scalars;
     float *result_scalar = subtract_result.scalars;
     for(int cursor = 0; cursor < (int)subtract_result.dimension; cursor++) {
-        float expected = fabs(*v1_scalar - *v2_scalar);
+        float expected = (*v1_scalar - *v2_scalar);
         if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
-            fprintf(stderr, "- Scalar values did not match.\n");
+            fprintf(stderr, "- Scalar subtraction values did not match.\n");
             return false;
         }
 
@@ -55,7 +55,7 @@ static bool vector_tests_add_and_subtract_should_succeed(float epsilon) {
     for(int cursor = 0; cursor < (int)add_result.dimension; cursor++) {
         float expected = *v1_scalar + *v2_scalar;
         if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
-            fprintf(stderr, "- Scalar values did not match.\n");
+            fprintf(stderr, "- Scalar addition values did not match.\n");
             return false;
         }
 
@@ -97,7 +97,7 @@ static bool vector_tests_multiply_and_divide_should_succeed(float epsilon) {
     for(int cursor = 0; cursor < (int)multiply_result.dimension; cursor++) {
         float expected = (*v1_scalar * *v2_scalar);
         if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
-            fprintf(stderr, "- Scalar values did not match.\n");
+            fprintf(stderr, "- Scalar multiplication values did not match.\n");
             return false;
         }
 
@@ -114,11 +114,11 @@ static bool vector_tests_multiply_and_divide_should_succeed(float epsilon) {
 
     v1_scalar = v1.scalars;
     v2_scalar = v2.scalars;
-    result_scalar = multiply_result.scalars;
+    result_scalar = divide_result.scalars;
     for(int cursor = 0; cursor < (int)multiply_result.dimension; cursor++) {
         float expected = (*v1_scalar / *v2_scalar);
         if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
-            fprintf(stderr, "- Scalar values did not match.\n");
+            fprintf(stderr, "- Scalar division values did not match.\n");
             return false;
         }
 
@@ -133,7 +133,7 @@ static bool vector_tests_multiply_and_divide_should_succeed(float epsilon) {
 
 bool vector_tests_arithmetic(float epsilon) {
     if(!vector_tests_add_and_subtract_should_succeed(epsilon)) {
-        fprintf(stderr, "- vector_tests_add_should_succeed() returned false (failure).\n");
+        fprintf(stderr, "- vector_tests_add_and_subtract_should_succeed() returned false (failure).\n");
         return false;
     }
 

@@ -14,17 +14,17 @@
 
 static bool find_largest_scalar_absolute(int dimension, float *scalars, float *largest_scalar) {
     if(dimension <= 0) {
-        fprintf(stderr, "The parameter dimension must be a positive integer.");
+        fprintf(stderr, "The parameter dimension must be a positive integer.\n");
         return false;
     }
 
     if(scalars == NULL) {
-        fprintf(stderr, "Provided scalars pointer was NULL.");
+        fprintf(stderr, "Provided scalars pointer was NULL.\n");
         return false;
     }
 
     if(largest_scalar == NULL) {
-        fprintf(stderr, "Provided largest_scalar pointer was NULL.");
+        fprintf(stderr, "Provided largest_scalar pointer was NULL.\n");
         return false;
     } 
 
@@ -34,7 +34,7 @@ static bool find_largest_scalar_absolute(int dimension, float *scalars, float *l
             *largest_scalar = fabs(*(scalars + cursor));
 
     if(*largest_scalar < 0.0f) {
-        fprintf(stderr, "Failed to find largest scalar, result was less than 0.");
+        fprintf(stderr, "Failed to find largest scalar, result was less than 0.\n");
         return false;
     }
 
@@ -43,17 +43,17 @@ static bool find_largest_scalar_absolute(int dimension, float *scalars, float *l
 
 bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     if(dimension <= 0) {
-        fprintf(stderr, "The parameter dimension must be a positive integer.");
+        fprintf(stderr, "The parameter dimension must be a positive integer.\n");
         return false;
     }
 
     if(scalars == NULL) {
-        fprintf(stderr, "Provided scalars pointer was NULL.");
+        fprintf(stderr, "Provided scalars pointer was NULL.\n");
         return false;
     }
 
     if(l2_result == NULL) {
-        fprintf(stderr, "Provided l2_result pointer was NULL.");
+        fprintf(stderr, "Provided l2_result pointer was NULL.\n");
         return false;
     }
     
@@ -61,7 +61,7 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     // at the end we scale the result back up by the same value so our result is the "same".
     float largest_scalar;
     if(!find_largest_scalar_absolute(dimension, scalars, &largest_scalar)) {
-        fprintf(stderr, "Failed to find largest scalar.");
+        fprintf(stderr, "Failed to find largest scalar.\n");
         return false;
     }
 
@@ -91,27 +91,27 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
 }
 
 static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *result) {
-    if(type != '+' || type != '-' || type != '*' || type != '/') {
-        fprintf(stderr, "Invalid type value.");
+    if(type != '+' && type != '-' && type != '*' && type != '/') {
+        fprintf(stderr, "Invalid type value.\n");
         return false;
     }
 
     if(v1 == NULL || v2 == NULL) {
-        fprintf(stderr, "One of the provided vector pointers was NULL.");
+        fprintf(stderr, "One of the provided vector pointers was NULL.\n");
         return false;
     }
 
     if(v1->dimension != v2->dimension) {
-        fprintf(stderr, "Dimensions were of different sizes.");
+        fprintf(stderr, "Dimensions were of different sizes.\n");
         return false;
     }
 
     if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.");
+        fprintf(stderr, "Provided result pointer was NULL.\n");
         return false;
     }
 
-    result->dimension = v1->dimension; 
+    result->dimension = (int)v1->dimension; 
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
@@ -119,11 +119,11 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
     result->scalars = (float *)malloc(result->dimension * sizeof(float));
     if(result->scalars == NULL) {
         free(result->scalars);
-        fprintf(stderr, "Failed to allocate memory.");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return false;
     }
 
-    for(int cursor = 0; cursor < v1->dimension; cursor++) {
+    for(int cursor = 0; cursor < (int)v1->dimension; cursor++) {
         switch(type) {
             case '+': 
                 result->scalars[cursor] = (v1_cursor[cursor] + v2_cursor[cursor]);
@@ -152,7 +152,7 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
 
 bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, ADD, result)) {
-        fprintf(stderr, "Failed to add vectors.");
+        fprintf(stderr, "Failed to add vectors.\n");
         return false;
     }
     return true;
@@ -160,7 +160,7 @@ bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 
 bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, SUBTRACT, result)) {
-        fprintf(stderr, "Failed to subtract vectors.");
+        fprintf(stderr, "Failed to subtract vectors.\n");
         return false;
     }
     return true;
@@ -168,7 +168,7 @@ bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 
 bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, MULTIPLY, result)) {
-        fprintf(stderr, "Failed to multiply vectors.");
+        fprintf(stderr, "Failed to multiply vectors.\n");
         return false;
     }
     return true;
@@ -176,14 +176,14 @@ bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 
 bool scale(LA_Vector *v1, float scalar, LA_Vector *result) {
     float *v1_cursor = v1->scalars;
-    for(int cursor = 0; cursor < v1->dimension; cursor++)
+    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
         result->scalars[cursor] = (*v1_cursor++ * scalar);
     return true;
 }
 
 bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, DIVIDE, result)) {
-        fprintf(stderr, "Failed to divide vectors.");
+        fprintf(stderr, "Failed to divide vectors.\n");
         return false;
     }
     return true;
@@ -191,17 +191,17 @@ bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 
 bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
     if(v1 == NULL || v2 == NULL) {
-        fprintf(stderr, "One of the provided vector pointers was NULL.");
+        fprintf(stderr, "One of the provided vector pointers was NULL.\n");
         return false;
     }
 
     if(v1->dimension != v2->dimension) {
-        fprintf(stderr, "Dimensions were of different sizes.");
+        fprintf(stderr, "Dimensions were of different sizes.\n");
         return false;
     }
 
     if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.");
+        fprintf(stderr, "Provided result pointer was NULL.\n");
         return false;
     }
 
@@ -209,7 +209,7 @@ bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
-    for(int cursor = 0; cursor < v1->dimension; cursor++)
+    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
         *result += (v1_cursor[cursor] * v2_cursor[cursor]);
 
     return true;
@@ -217,7 +217,7 @@ bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
 
 bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
     if(v1 == NULL || v2 == NULL) {
-        fprintf(stderr, "One of the provided vector pointers was NULL.");
+        fprintf(stderr, "One of the provided vector pointers was NULL.\n");
         *result = false;
         return false; // failure.
     }
@@ -230,7 +230,7 @@ bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
 
-    for(int cursor = 0; cursor < v1->dimension; cursor++) {
+    for(int cursor = 0; cursor < (int)v1->dimension; cursor++) {
         // floats only store ~6 trustworthy values, if the value grows too large we lose accuracy;
         // epsilon has to be relative to size of diff to cover that :(
         float diff = (fabsf(v1_cursor[cursor] - v2_cursor[cursor]));
