@@ -7,8 +7,10 @@
 #include <string.h>
 
 #define EPSILON 1e-6f
-#define ADD true
-#define SUBTRACT false
+#define ADD '+'
+#define SUBTRACT '-'
+#define MULTIPLY '*'
+#define DIVIDE '/'
 
 static bool find_largest_scalar_absolute(int dimension, float *scalars, float *largest_scalar) {
     if(dimension <= 0) {
@@ -88,7 +90,12 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
     return true;
 }
 
-static bool perform_arithmetic(LA_Vector *v1, LA_Vector *v2, bool is_addition, LA_Vector *result) {
+static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *result) {
+    if(type != '+' || type != '-' || type != '*' || type != '/') {
+        fprintf(stderr, "Invalid type value.");
+        return false;
+    }
+
     if(v1 == NULL || v2 == NULL) {
         fprintf(stderr, "One of the provided vector pointers was NULL.");
         return false;
@@ -117,9 +124,23 @@ static bool perform_arithmetic(LA_Vector *v1, LA_Vector *v2, bool is_addition, L
     }
 
     for(int cursor = 0; cursor < v1->dimension; cursor++) {
-        result->scalars[cursor] = (is_addition)
-            ? (v1_cursor[cursor] + v2_cursor[cursor])
-            : (v1_cursor[cursor] - v2_cursor[cursor]);
+        switch(type) {
+            case '+': 
+                result->scalars[cursor] = (v1_cursor[cursor] + v2_cursor[cursor]);
+                break;
+
+            case '-':
+                result->scalars[cursor] = (v1_cursor[cursor] - v2_cursor[cursor]);
+                break;
+
+            case '*':
+                result->scalars[cursor] = (v1_cursor[cursor] * v2_cursor[cursor]);
+                break;
+
+            case '/':
+                result->scalars[cursor] = (v1_cursor[cursor] / v2_cursor[cursor]);
+                break;
+        } 
     }
 
     float l2_norm;
@@ -130,7 +151,7 @@ static bool perform_arithmetic(LA_Vector *v1, LA_Vector *v2, bool is_addition, L
 }
 
 bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!perform_arithmetic(v1, v2, ADD, result)) {
+    if(!arithmetic_op(v1, v2, ADD, result)) {
         fprintf(stderr, "Failed to add vectors.");
         return false;
     }
@@ -138,10 +159,59 @@ bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 }
 
 bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!perform_arithmetic(v1, v2, SUBTRACT, result)) {
+    if(!arithmetic_op(v1, v2, SUBTRACT, result)) {
         fprintf(stderr, "Failed to subtract vectors.");
         return false;
     }
+    return true;
+}
+
+bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+    if(!arithmetic_op(v1, v2, MULTIPLY, result)) {
+        fprintf(stderr, "Failed to multiply vectors.");
+        return false;
+    }
+    return true;
+}
+
+bool scale(LA_Vector *v1, float scalar, LA_Vector *result) {
+    float *v1_cursor = v1->scalars;
+    for(int cursor = 0; cursor < v1->dimension; cursor++)
+        result->scalars[cursor] = (*v1_cursor++ * scalar);
+    return true;
+}
+
+bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+    if(!arithmetic_op(v1, v2, DIVIDE, result)) {
+        fprintf(stderr, "Failed to divide vectors.");
+        return false;
+    }
+    return true;
+}
+
+bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
+    if(v1 == NULL || v2 == NULL) {
+        fprintf(stderr, "One of the provided vector pointers was NULL.");
+        return false;
+    }
+
+    if(v1->dimension != v2->dimension) {
+        fprintf(stderr, "Dimensions were of different sizes.");
+        return false;
+    }
+
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.");
+        return false;
+    }
+
+    *result = 0.0f;
+
+    float *v1_cursor = v1->scalars;
+    float *v2_cursor = v2->scalars;
+    for(int cursor = 0; cursor < v1->dimension; cursor++)
+        *result += (v1_cursor[cursor] * v2_cursor[cursor]);
+
     return true;
 }
 
