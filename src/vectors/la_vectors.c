@@ -41,7 +41,7 @@ static bool find_largest_scalar_absolute(int dimension, float *scalars, float *l
     return true;
 }
 
-bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
+bool la_calculate_l2_norm(size_t dimension, float *scalars, float *l2_result) {
     if(dimension <= 0) {
         fprintf(stderr, "The parameter dimension must be a positive integer.\n");
         return false;
@@ -143,13 +143,13 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
     }
 
     float l2_norm;
-    calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
+    la_calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
     result->l2_norm = l2_norm;
 
     return true;
 }
 
-bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+bool la_add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, ADD, result)) {
         fprintf(stderr, "Failed to add vectors.\n");
         return false;
@@ -158,7 +158,7 @@ bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     return true;
 }
 
-bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+bool la_subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, SUBTRACT, result)) {
         fprintf(stderr, "Failed to subtract vectors.\n");
         return false;
@@ -167,7 +167,7 @@ bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     return true;
 }
 
-bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+bool la_multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, MULTIPLY, result)) {
         fprintf(stderr, "Failed to multiply vectors.\n");
         return false;
@@ -176,7 +176,7 @@ bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     return true;
 }
 
-bool scale(LA_Vector *v1, float scalar, LA_Vector *result) {
+bool la_scale(LA_Vector *v1, float scalar, LA_Vector *result) {
     float *v1_cursor = v1->scalars;
     for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
         result->scalars[cursor] = (*v1_cursor++ * scalar);
@@ -184,7 +184,7 @@ bool scale(LA_Vector *v1, float scalar, LA_Vector *result) {
     return true;
 }
 
-bool cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+bool la_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     int required_dimension = 3;
 
     if(v1 == NULL || v1->scalars == NULL) {
@@ -234,13 +234,13 @@ bool cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     r[2] = (s1[0] * s2[1]) - (s1[1] * s2[0]);
 
     float l2_norm;
-    calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
+    la_calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
     result->l2_norm = l2_norm;
 
     return true;
 }
 
-bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+bool la_divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     if(!arithmetic_op(v1, v2, DIVIDE, result)) {
         fprintf(stderr, "Failed to divide vectors.\n");
         return false;
@@ -249,7 +249,7 @@ bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
     return true;
 }
 
-bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
+bool la_dot(LA_Vector *v1, LA_Vector *v2, float *result) {
     if(v1 == NULL || v2 == NULL) {
         fprintf(stderr, "One of the provided vector pointers was NULL.\n");
         return false;
@@ -275,7 +275,7 @@ bool dot(LA_Vector *v1, LA_Vector *v2, float *result) {
     return true;
 }
 
-bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
+bool la_is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
     if(v1 == NULL || v2 == NULL) {
         fprintf(stderr, "One of the provided vector pointers was NULL.\n");
         *result = false;
