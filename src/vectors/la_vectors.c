@@ -83,7 +83,6 @@ bool calculate_l2_norm(int dimension, float *scalars, float *l2_result) {
         float result = (*l2_result / seeker);
         seeker = ((seeker + result) / 2);
     }
-
     
     *l2_result = (seeker * largest_scalar); // scale back up.
 
@@ -155,6 +154,7 @@ bool add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         fprintf(stderr, "Failed to add vectors.\n");
         return false;
     }
+
     return true;
 }
 
@@ -163,6 +163,7 @@ bool subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         fprintf(stderr, "Failed to subtract vectors.\n");
         return false;
     }
+
     return true;
 }
 
@@ -171,6 +172,7 @@ bool multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         fprintf(stderr, "Failed to multiply vectors.\n");
         return false;
     }
+
     return true;
 }
 
@@ -178,6 +180,63 @@ bool scale(LA_Vector *v1, float scalar, LA_Vector *result) {
     float *v1_cursor = v1->scalars;
     for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
         result->scalars[cursor] = (*v1_cursor++ * scalar);
+
+    return true;
+}
+
+bool cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
+    int required_dimension = 3;
+
+    if(v1 == NULL || v1->scalars == NULL) {
+        fprintf(stderr, "The provided vector pointer {v1} was invalid.\n");
+        return false;
+    }
+
+    if(v2 == NULL || v2->scalars == NULL) {
+        fprintf(stderr, "The provided vector pointer {v2} was invalid.\n");
+        return false;
+    }
+
+    if(result == NULL) {
+        fprintf(stderr, "The provided vector pointer {result} was invalid.\n");
+        return false;
+    }
+
+    if(v1->dimension != required_dimension || v2->dimension != required_dimension) {
+        fprintf(stderr, "Vectors for cross product calculation must be 3 dimensional.\n");
+        return false;
+    }
+
+    if(v1 == result || v2 == result) {
+        fprintf(stderr, "Vectors for cross product calculation must be unique (instance was provided more than once).\n");
+        return false;
+    }
+
+    result->dimension = required_dimension;
+
+    float *scalar_cache = malloc(v1->dimension * sizeof(float));
+    if(scalar_cache == NULL) {
+        fprintf(stderr, "Failed to allocate memory.\n");
+        return false;
+    } 
+
+    if(result->scalars != NULL) {
+        free(result->scalars);
+    }
+
+    result->scalars = scalar_cache;
+
+    float *s1 = v1->scalars;
+    float *s2 = v2->scalars;
+    float *r = result->scalars;
+    r[0] = (s1[1] * s2[2]) - (s1[2] * s2[1]);
+    r[1] = (s1[2] * s2[0]) - (s1[0] * s2[2]);
+    r[2] = (s1[0] * s2[1]) - (s1[1] * s2[0]);
+
+    float l2_norm;
+    calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
+    result->l2_norm = l2_norm;
+
     return true;
 }
 
@@ -186,6 +245,7 @@ bool divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         fprintf(stderr, "Failed to divide vectors.\n");
         return false;
     }
+
     return true;
 }
 

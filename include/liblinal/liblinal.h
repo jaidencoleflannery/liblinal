@@ -13,9 +13,13 @@ typedef struct {
     float *scalars;
 } LA_Vector;
 
-bool calculate_l2_norm(int dimension, float *scalars, float *l2_result);
+// vector ops
 
 bool is_equal(LA_Vector *v1, LA_Vector *v2, bool *result);
+
+bool cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result)
+
+bool calculate_l2_norm(int dimension, float *scalars, float *l2_result);
 
 // vector arithmetic-esque operations.
 
