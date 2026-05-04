@@ -177,3 +177,27 @@ bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
     return false;
 }
 
+bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
+    if(m == NULL) {
+        fprintf(stderr, "The provided matrix pointer was NULL");
+        return false;
+    }
+
+    if(row > m->rows) {
+        fprintf(stderr, "Index queried is out of bounds for the provided matrix.");
+        return false;
+    }
+
+    if(result != NULL)
+        free(result);
+    result = malloc(sizeof(LA_Matrix));
+    if(result == NULL) {
+        fprintf(stderr, "Failed to allocate memory.");
+        return false;
+    }
+
+    for(int cursor = 0; cursor < m->columns; cursor++)
+        result->data[cursor] = m->data[(row * m->columns) + cursor];
+
+    return true;
+}
