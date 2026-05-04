@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define EPSILON 1e-6f
+
 // vectors.
 
 typedef struct {

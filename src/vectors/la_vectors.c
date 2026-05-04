@@ -8,11 +8,6 @@
 
 #define EPSILON 1e-6f
 
-#define ADD '+'
-#define SUBTRACT '-'
-#define MULTIPLY '*'
-#define DIVIDE '/'
-
 typedef bool (*operation)(float, float, float *);
 
 static bool add(float a, float b, float *result) {

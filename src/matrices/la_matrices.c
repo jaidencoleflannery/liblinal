@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <math.h>
 
 typedef bool (*operation)(float, float, float *);
 
@@ -63,11 +64,12 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
 
     for(size_t column = 0; column < m1->columns; column++) {
         size_t offset = (column * m1->rows);
-        for(size_t row = 0; row < m1->rows; row++)
+        for(size_t row = 0; row < m1->rows; row++) {
              if(!op(m1->data[offset], m2->data[offset], &(result->data[offset]))) {
                  fprintf(stderr, "Failed to perform operation on matrices.");
                 return false;
              }
+        }
     }
 
     return true;
@@ -106,6 +108,37 @@ bool la_matrix_divide(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
         return false;
     }
 
+    return true;
+}
+
+bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
+    if(m1 == NULL || m2 == NULL || result == NULL) {
+        fprintf(stderr, "A provided pointer was NULL.");
+        return false;
+    }
+
+    if(m1->rows != m2->rows || m1->columns != m2->columns) {
+        *result = false;
+        return true;
+    }
+
+    // matrix data is contiguous, just check every float.
+    size_t matrix_size = m1->columns * m1->rows;
+    for(size_t cursor  = 0; cursor < matrix_size; cursor++) {
+        // if value is 0 or extremely small, epsilon doesn't work.
+        if(m1->data[cursor] < EPSILON || m2->data[cursor] < EPSILON)
+            if(m1->data[cursor] != m2->data[cursor]) {
+                *result = false;
+                return true;
+            }
+
+        if(fabsf(m1->data[cursor] - m2->data[cursor]) > fabsf(EPSILON * m1->data[cursor])) {
+            *result = false;
+            return true;
+        }
+    }
+
+    *result = true;
     return true;
 }
 
