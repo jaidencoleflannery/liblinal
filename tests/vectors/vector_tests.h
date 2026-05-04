@@ -1,8 +1,10 @@
 #ifndef VECTOR_TESTS_H
 #define VECTOR_TESTS_H
 
-bool vector_tests_arithmetic(float epsilon);
+bool run_vector_tests();
 
-bool vector_tests_ops(float epsilon);
+bool vector_tests_ops();
+
+bool vector_tests_arithmetic();
 
 #endif

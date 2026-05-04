@@ -5,7 +5,9 @@
 #include "vector_tests.h"
 #include "../../include/liblinal/liblinal.h"
 
-static bool vector_tests_la_add_and_la_subtract_should_succeed(float epsilon) {
+#define EPSILON 1e-6f // bare minimum expectation, 4 decimal place values of accuracy (large float integer values will break this).
+
+static bool vector_tests_la_add_and_la_subtract_should_succeed() {
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
 
     LA_Vector v1 = {
@@ -33,7 +35,7 @@ static bool vector_tests_la_add_and_la_subtract_should_succeed(float epsilon) {
     float *result_scalar = la_subtract_result.scalars;
     for(int cursor = 0; cursor < (int)la_subtract_result.dimension; cursor++) {
         float expected = (*v1_scalar - *v2_scalar);
-        if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
+        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
             fprintf(stderr, "- Scalar la_subtraction values did not match.\n");
             return false;
         }
@@ -54,7 +56,7 @@ static bool vector_tests_la_add_and_la_subtract_should_succeed(float epsilon) {
     result_scalar = la_add_result.scalars;
     for(int cursor = 0; cursor < (int)la_add_result.dimension; cursor++) {
         float expected = *v1_scalar + *v2_scalar;
-        if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
+        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
             fprintf(stderr, "- Scalar la_addition values did not match.\n");
             return false;
         }
@@ -64,11 +66,11 @@ static bool vector_tests_la_add_and_la_subtract_should_succeed(float epsilon) {
         ++v2_scalar;
     }
 
-    printf("+ Test for vector la_addition and la_subtraction passed.\n");
+    printf("+ Test for vector addition and subtraction passed.\n");
     return true;
 }
 
-static bool vector_tests_la_multiply_and_la_divide_should_succeed(float epsilon) {
+static bool vector_tests_la_multiply_and_la_divide_should_succeed() {
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
 
     LA_Vector v1 = {
@@ -96,7 +98,7 @@ static bool vector_tests_la_multiply_and_la_divide_should_succeed(float epsilon)
     float *result_scalar = la_multiply_result.scalars;
     for(int cursor = 0; cursor < (int)la_multiply_result.dimension; cursor++) {
         float expected = (*v1_scalar * *v2_scalar);
-        if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
+        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
             fprintf(stderr, "- Scalar multiplication values did not match.\n");
             return false;
         }
@@ -117,7 +119,7 @@ static bool vector_tests_la_multiply_and_la_divide_should_succeed(float epsilon)
     result_scalar = la_divide_result.scalars;
     for(int cursor = 0; cursor < (int)la_multiply_result.dimension; cursor++) {
         float expected = (*v1_scalar / *v2_scalar);
-        if(fabs(*result_scalar - expected) > (epsilon * fabs(expected))) {
+        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
             fprintf(stderr, "- Scalar division values did not match.\n");
             return false;
         }
@@ -131,13 +133,13 @@ static bool vector_tests_la_multiply_and_la_divide_should_succeed(float epsilon)
     return true;
 }
 
-bool vector_tests_arithmetic(float epsilon) {
-    if(!vector_tests_la_add_and_la_subtract_should_succeed(epsilon)) {
+bool vector_tests_arithmetic() {
+    if(!vector_tests_la_add_and_la_subtract_should_succeed()) {
         fprintf(stderr, "- vector_tests_la_add_and_la_subtract_should_succeed() returned false (failure).\n");
         return false;
     }
 
-    if(!vector_tests_la_multiply_and_la_divide_should_succeed(epsilon)) {
+    if(!vector_tests_la_multiply_and_la_divide_should_succeed()) {
         fprintf(stderr, "- vector_tests_la_multiply_and_la_divide_should_succeed() returned false (failure).\n");
         return false;
     }
@@ -145,25 +147,83 @@ bool vector_tests_arithmetic(float epsilon) {
     return true;
 }
 
-static bool vector_tests_is_equal_should_succeed(float epsilon) {
+static bool vector_tests_is_equal_should_succeed() { 
+    LA_Vector v1 = {
+        .dimension = 3,
+        .l2_norm = 0.0,
+        .scalars = (float[]){ 2.4, 1.0, 8.9 }
+    };
+    LA_Vector v2 = {
+        .dimension = 3,
+        .l2_norm = 0.0,
+        .scalars = (float[]){ 0.8, 9.1, 4.9 }
+    }; 
+
+    bool call_result;
+    if(!la_is_equal(&v1, &v2, &call_result)) {
+        fprintf(stderr, "- Could not compare vectors, la_is_equal failed.");
+        return false;
+    }
+
+    bool local_result = true;
+    for(int cursor = 0; cursor < (int)v1.dimension; cursor++)
+        if(fabsf(v2.scalars[cursor] - v1.scalars[cursor]) > EPSILON)
+            local_result = false;
+ 
+    return (call_result == local_result);
+}
+
+static bool vector_tests_get_cross_product_should_succeed() {
+    LA_Vector v1 = {
+        .dimension = 3,
+        .l2_norm = 0.0,
+        .scalars = (float[]){ 2.4, 1.0, 8.9 }
+    };
+    LA_Vector v2 = {
+        .dimension = 3,
+        .l2_norm = 0.0,
+        .scalars = (float[]){ 0.8, 9.1, 4.9 }
+    };
+
+    float scalar_results[] = (float[]){ -76.09, -4.64, 21.04 };
+    LA_Vector v_result = {0};
+    if(!la_cross(&v1, &v2, &v_result)) {
+        fprintf(stderr, "- Could not calculate cross product of vectors, la_cross failed.");
+        return false;
+    }
+
+    for(int cursor = 0; cursor < (int)v1.dimension; cursor++)
+        if(fabsf(v_result.scalars[cursor] - scalar_results[cursor]) > EPSILON)
+            return false;
+
     return true;
 }
 
-static bool vector_tests_get_cross_product_should_succeed(float epsilon) {
-    return true;
-}
-
-bool vector_tests_ops(float epsilon) {
-    if(!vector_tests_is_equal_should_succeed(epsilon)) {
+bool vector_tests_ops() {
+    if(!vector_tests_is_equal_should_succeed()) {
         fprintf(stderr, "- vector_tests_is_equal_should_succeed() returned false (failure).\n");
         return false;
     }
 
-    if(!vector_tests_get_cross_product_should_succeed(epsilon)) {
+    if(!vector_tests_get_cross_product_should_succeed()) {
         fprintf(stderr, "- vector_tests_get_cross_product_should_succeed() returned false (failure).\n");
         return false;
     }
  
     return true;
+}
+
+bool run_vector_tests() {
+    if(!vector_tests_ops()) {
+        fprintf(stderr, "- vector_tests_ops() returned false (failure).\n");
+        return false;
+    }
+
+    if(!vector_tests_arithmetic()) {
+        fprintf(stderr, "- vector_tests_arithmetic() returned false (failure).\n");
+        return false;
+    }
+ 
+    return true; 
 }
 
