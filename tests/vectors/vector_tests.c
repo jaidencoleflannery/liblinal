@@ -146,10 +146,11 @@ bool vector_tests_arithmetic(float epsilon) {
 }
 
 static bool vector_tests_is_equal_should_succeed(float epsilon) {
-
+    return true;
 }
 
 static bool vector_tests_get_cross_product_should_succeed(float epsilon) {
+    return true;
 }
 
 bool vector_tests_ops(float epsilon) {

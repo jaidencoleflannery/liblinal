@@ -69,7 +69,8 @@ bool la_calculate_l2_norm(size_t dimension, float *scalars, float *l2_result) {
     float *scalar_cursor = scalars;
 
     // square and add.
-    for(int cursor = 0; cursor < dimension; cursor++) {
+    // loop with size_t in case of vectors larger than int's max.
+    for(size_t cursor = 0; cursor < dimension; cursor++) {
         *l2_result += (*scalar_cursor / largest_scalar) * (*scalar_cursor / largest_scalar);
         ++scalar_cursor;
     }
@@ -202,7 +203,7 @@ bool la_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         return false;
     }
 
-    if(v1->dimension != required_dimension || v2->dimension != required_dimension) {
+    if((int)v1->dimension != required_dimension || (int)v2->dimension != required_dimension) {
         fprintf(stderr, "Vectors for cross product calculation must be 3 dimensional.\n");
         return false;
     }
