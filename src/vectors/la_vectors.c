@@ -98,7 +98,7 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
     }
 
     if(v1 == NULL || v2 == NULL) {
-        fprintf(stderr, "One of the provided vector pointers was NULL.\n");
+        fprintf(stderr, "One of the provided vector pointers were NULL.\n");
         return false;
     }
 
