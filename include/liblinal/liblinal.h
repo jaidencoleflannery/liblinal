@@ -38,11 +38,9 @@ bool la_divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result);
 typedef struct {
     size_t rows;
     size_t columns;
-} LA_Matrix_Size;
-
-typedef struct {
-    LA_Matrix_Size size; 
-    float *data; // the 2d array can just be one long contiguous block, you can count which column you're in by the num of rows from .size.
+    // the 2d array is one contiguous block of memory.
+    // data is stored in sections of .rows length, to jump from [0, 0] to [0, 1] you'd skip .rows elements.
+    float *data;
 } LA_Matrix;
 
 #endif

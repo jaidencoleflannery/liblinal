@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define EPSILON 1e-6f
+
 #define ADD '+'
 #define SUBTRACT '-'
 #define MULTIPLY '*'
