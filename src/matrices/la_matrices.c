@@ -143,3 +143,37 @@ bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     return true;
 }
 
+bool la_matrix_get(LA_Matrix *m, int row, int column, float *result) {
+    if(m == NULL || result == NULL) {
+        fprintf(stderr, "A provided pointer was NULL");
+        return false;
+    }
+
+    if(row > m->rows || column > m->columns) {
+        fprintf(stderr, "Index queried is out of bounds for the provided matrix.");
+        return false;
+    }
+
+    *result = m->data[(row * m->columns) + column];
+    return true;
+}
+
+bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
+    if(m == NULL) {
+        fprintf(stderr, "The provided matrix pointer was NULL");
+        return false;
+    }
+
+    if(row > m->rows || column > m->columns) {
+        fprintf(stderr, "Index queried is out of bounds for the provided matrix.");
+        return false;
+    }
+
+    m->data[(row * m->columns) + column] = value;
+    if(m->data[(row * m->columns) + column] == value)
+        return true;
+    else
+        fprintf(stderr, "Failed to insert value.");
+    return false;
+}
+
