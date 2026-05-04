@@ -13,6 +13,48 @@
 #define MULTIPLY '*'
 #define DIVIDE '/'
 
+typedef bool (*operation)(float, float, float *);
+
+static bool add(float a, float b, float *result) {
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.\n");
+        return false;
+    }
+
+    *result = a + b;
+    return true;
+}
+
+static bool subtract(float a, float b, float *result) {
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.\n");
+        return false;
+    }
+
+    *result = a - b;
+    return true;
+}
+
+static bool multiply(float a, float b, float *result) {
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.\n");
+        return false;
+    }
+
+    *result = a * b;
+    return true;
+}
+
+static bool divide(float a, float b, float *result) {
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.\n");
+        return false;
+    }
+
+    *result = a / b;
+    return true;
+}
+
 static bool find_largest_scalar_absolute(int dimension, float *scalars, float *largest_scalar) {
     if(dimension <= 0) {
         fprintf(stderr, "The parameter dimension must be a positive integer.\n");
@@ -91,12 +133,7 @@ bool la_calculate_l2_norm(size_t dimension, float *scalars, float *l2_result) {
     return true;
 }
 
-static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *result) {
-    if(type != '+' && type != '-' && type != '*' && type != '/') {
-        fprintf(stderr, "Invalid type value.\n");
-        return false;
-    }
-
+static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, operation op, LA_Vector *result) { 
     if(v1 == NULL || v2 == NULL) {
         fprintf(stderr, "One of the provided vector pointers were NULL.\n");
         return false;
@@ -124,25 +161,8 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
         return false;
     }
 
-    for(int cursor = 0; cursor < (int)v1->dimension; cursor++) {
-        switch(type) {
-            case '+': 
-                result->scalars[cursor] = (v1_cursor[cursor] + v2_cursor[cursor]);
-                break;
-
-            case '-':
-                result->scalars[cursor] = (v1_cursor[cursor] - v2_cursor[cursor]);
-                break;
-
-            case '*':
-                result->scalars[cursor] = (v1_cursor[cursor] * v2_cursor[cursor]);
-                break;
-
-            case '/':
-                result->scalars[cursor] = (v1_cursor[cursor] / v2_cursor[cursor]);
-                break;
-        } 
-    }
+    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
+         op(v1_cursor[cursor], v2_cursor[cursor], &result->scalars[cursor]);
 
     float l2_norm;
     la_calculate_l2_norm(result->dimension, result->scalars, &l2_norm);
@@ -152,7 +172,7 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, char type, LA_Vector *re
 }
 
 bool la_add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!arithmetic_op(v1, v2, ADD, result)) {
+    if(!arithmetic_op(v1, v2, &add, result)) {
         fprintf(stderr, "Failed to add vectors.\n");
         return false;
     }
@@ -161,7 +181,7 @@ bool la_add(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 }
 
 bool la_subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!arithmetic_op(v1, v2, SUBTRACT, result)) {
+    if(!arithmetic_op(v1, v2, &subtract, result)) {
         fprintf(stderr, "Failed to subtract vectors.\n");
         return false;
     }
@@ -170,7 +190,7 @@ bool la_subtract(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 }
 
 bool la_multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!arithmetic_op(v1, v2, MULTIPLY, result)) {
+    if(!arithmetic_op(v1, v2, &multiply, result)) {
         fprintf(stderr, "Failed to multiply vectors.\n");
         return false;
     }
@@ -243,7 +263,7 @@ bool la_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 }
 
 bool la_divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    if(!arithmetic_op(v1, v2, DIVIDE, result)) {
+    if(!arithmetic_op(v1, v2, &divide, result)) {
         fprintf(stderr, "Failed to divide vectors.\n");
         return false;
     }
