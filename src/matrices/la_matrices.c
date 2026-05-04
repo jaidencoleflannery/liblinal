@@ -120,24 +120,25 @@ bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     if(m1->rows != m2->rows || m1->columns != m2->columns) {
         *result = false;
         return true;
-    }
+    } 
 
     // matrix data is contiguous, just check every float.
     size_t matrix_size = m1->columns * m1->rows;
     for(size_t cursor  = 0; cursor < matrix_size; cursor++) {
-        // if value is 0 or extremely small, epsilon doesn't work.
-        if(m1->data[cursor] < EPSILON || m2->data[cursor] < EPSILON)
-            if(m1->data[cursor] != m2->data[cursor]) {
+        float s1 = m1->data[cursor];
+        float s2 = m2->data[cursor];
+        // if value is 0 or extremely small, relative epsilon doesn't work.
+        if(fabsf(s1) < EPSILON || fabsf(s2) < EPSILON) {
+            if(fabsf(s1 - s2) > EPSILON) {
                 *result = false;
                 return true;
             }
-
-        if(fabsf(m1->data[cursor] - m2->data[cursor]) > fabsf(EPSILON * m1->data[cursor])) {
+        } else if(fabsf(s1 - s2) > fabsf(EPSILON * s1)) {
             *result = false;
             return true;
         }
     }
-
+    
     *result = true;
     return true;
 }
