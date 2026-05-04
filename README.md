@@ -1,4 +1,4 @@
 # liblinal
-a memory efficient library for linear algebra calculations.
+a library for memory efficient linear algebra calculations.
 
 > **status:** in development.
