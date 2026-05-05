@@ -40,9 +40,7 @@ bool la_divide(LA_Vector *v1, LA_Vector *v2, LA_Vector *result);
 typedef struct {
     size_t rows;
     size_t columns;
-    // the 2d array is one contiguous block of memory.
-    // data is stored in sections of .rows length, to jump from [0, 0] to [0, 1] you'd skip .rows elements.
-    float *data;
+    float data[][];
 } LA_Matrix;
 
 // rand.

@@ -1,13 +1,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "vector_tests.h"
 #include "../../include/liblinal/liblinal.h"
 
-#define EPSILON 1e-6f // bare minimum expectation, 4 decimal place values of accuracy (large float integer values will break this).
-
-static bool vector_tests_la_add_and_la_subtract_should_succeed() {
+static bool vector_tests_add_and_subtract_should_succeed() {
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
 
     LA_Vector v1 = {
@@ -57,7 +56,7 @@ static bool vector_tests_la_add_and_la_subtract_should_succeed() {
     for(int cursor = 0; cursor < (int)la_add_result.dimension; cursor++) {
         float expected = *v1_scalar + *v2_scalar;
         if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
-            fprintf(stderr, "- Scalar la_addition values did not match.\n");
+            fprintf(stderr, "- Scalar addition values did not match.\n");
             return false;
         }
 
@@ -70,7 +69,7 @@ static bool vector_tests_la_add_and_la_subtract_should_succeed() {
     return true;
 }
 
-static bool vector_tests_la_multiply_and_la_divide_should_succeed() {
+static bool vector_tests_multiply_and_divide_should_succeed() {
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
 
     LA_Vector v1 = {
@@ -133,20 +132,6 @@ static bool vector_tests_la_multiply_and_la_divide_should_succeed() {
     return true;
 }
 
-bool vector_tests_arithmetic() {
-    if(!vector_tests_la_add_and_la_subtract_should_succeed()) {
-        fprintf(stderr, "- vector_tests_la_add_and_la_subtract_should_succeed() returned false (failure).\n");
-        return false;
-    }
-
-    if(!vector_tests_la_multiply_and_la_divide_should_succeed()) {
-        fprintf(stderr, "- vector_tests_la_multiply_and_la_divide_should_succeed() returned false (failure).\n");
-        return false;
-    }
- 
-    return true;
-}
-
 static bool vector_tests_is_equal_should_succeed() { 
     LA_Vector v1 = {
         .dimension = 3,
@@ -161,7 +146,7 @@ static bool vector_tests_is_equal_should_succeed() {
 
     bool call_result;
     if(!la_is_equal(&v1, &v2, &call_result)) {
-        fprintf(stderr, "- Could not compare vectors, la_is_equal failed.");
+        fprintf(stderr, "- Could not compare vectors, equality check failed.");
         return false;
     }
 
@@ -188,7 +173,7 @@ static bool vector_tests_get_cross_product_should_succeed() {
     float scalar_results[] = (float[]){ -76.09, -4.64, 21.04 };
     LA_Vector v_result = {0};
     if(!la_cross(&v1, &v2, &v_result)) {
-        fprintf(stderr, "- Could not calculate cross product of vectors, la_cross failed.");
+        fprintf(stderr, "- Could not calculate cross product of vectors, function returned false (failure).");
         return false;
     }
 
@@ -201,12 +186,26 @@ static bool vector_tests_get_cross_product_should_succeed() {
 
 bool vector_tests_ops() {
     if(!vector_tests_is_equal_should_succeed()) {
-        fprintf(stderr, "- vector_tests_is_equal_should_succeed() returned false (failure).\n");
+        fprintf(stderr, "- Success path for vector equality tests returned false (failure).\n");
         return false;
     }
 
     if(!vector_tests_get_cross_product_should_succeed()) {
-        fprintf(stderr, "- vector_tests_get_cross_product_should_succeed() returned false (failure).\n");
+        fprintf(stderr, "- Success path for vector cross product tests returned false (failure).\n");
+        return false;
+    }
+ 
+    return true;
+}
+
+bool vector_tests_arithmetic() {
+    if(!vector_tests_add_and_subtract_should_succeed()) {
+        fprintf(stderr, "- Success path for vector addition and subtraction tests returned false (failure).\n");
+        return false;
+    }
+
+    if(!vector_tests_multiply_and_divide_should_succeed()) {
+        fprintf(stderr, "- Success path for vector multiplication and division returned false (failure).\n");
         return false;
     }
  
@@ -215,12 +214,12 @@ bool vector_tests_ops() {
 
 bool run_vector_tests() {
     if(!vector_tests_ops()) {
-        fprintf(stderr, "- vector_tests_ops() returned false (failure).\n");
+        fprintf(stderr, "- Vector operation tests returned false (failure).\n");
         return false;
     }
 
     if(!vector_tests_arithmetic()) {
-        fprintf(stderr, "- vector_tests_arithmetic() returned false (failure).\n");
+        fprintf(stderr, "- Vector arithmetic tests returned false (failure).\n");
         return false;
     }
  
