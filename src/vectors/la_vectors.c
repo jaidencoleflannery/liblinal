@@ -6,10 +6,6 @@
 #include <math.h>
 #include <string.h>
 
-#define EPSILON 1e-6f
-
-typedef bool (*operation)(float, float, float *);
-
 static bool add(float a, float b, float *result) {
     if(result == NULL) {
         fprintf(stderr, "Provided result pointer was NULL.\n");
@@ -237,9 +233,8 @@ bool la_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         return false;
     } 
 
-    if(result->scalars != NULL) {
+    if(result->scalars != NULL)
         free(result->scalars);
-    }
 
     result->scalars = scalar_cache;
 

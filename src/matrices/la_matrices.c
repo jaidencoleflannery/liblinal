@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 
-typedef bool (*operation)(float, float, float *);
-
 static bool add(float a, float b, float *result) {
     if(result == NULL) {
         fprintf(stderr, "Provided result pointer was NULL.\n");
@@ -179,11 +177,12 @@ bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
 
 bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
     if(m == NULL) {
-        fprintf(stderr, "The provided matrix pointer was NULL");
+        fprintf(stderr, "The provided matrix pointer was NULL.");
         return false;
     }
 
-    if(row > m->rows) {
+    // m->rows is 1 indexed.
+    if(row >= m->rows) {
         fprintf(stderr, "Index queried is out of bounds for the provided matrix.");
         return false;
     }
@@ -196,8 +195,54 @@ bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
         return false;
     }
 
+    result->data = malloc(sizeof(float) * m->columns);
+    if(result->data == NULL) {
+        fprintf(stderr, "Failed to allocate memory.");
+        return false;
+    }
+
+    result->columns = m->columns;
+    result->rows = 1;
+
     for(int cursor = 0; cursor < m->columns; cursor++)
-        result->data[cursor] = m->data[(row * m->columns) + cursor];
+        result->data[cursor] = m->data[(cursor * m->columns) + row];
 
     return true;
 }
+
+bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result) {
+    if(m == NULL) {
+        fprintf(stderr, "The provided matrix pointer was NULL.");
+        return false;
+    }
+
+    // m->columns is 1 indexed.
+    if(column >= m->columns) {
+        fprintf(stderr, "Index queried is out of bounds for the provided matrix.");
+        return false;
+    }
+
+    if(result != NULL)
+        free(result);
+    result = malloc(sizeof(LA_Matrix));
+    if(result == NULL) {
+        fprintf(stderr, "Failed to allocate memory.");
+        return false;
+    }
+
+    result->data = malloc(sizeof(float) * m->rows);
+    if(result->data == NULL) {
+        fprintf(stderr, "Failed to allocate memory.");
+        return false;
+    }
+
+    result->columns = 1;
+    result->rows = m->rows;
+
+    // could just cast these column matrices to a vector.
+    for(int cursor = 0; cursor < m->columns; cursor++)
+        result->data[cursor] = m->data[(column * m->rows) + cursor];
+
+    return true;
+}
+

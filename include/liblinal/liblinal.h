@@ -45,4 +45,8 @@ typedef struct {
     float *data;
 } LA_Matrix;
 
+// rand.
+
+typedef bool (*operation)(float, float, float *);
+
 #endif
