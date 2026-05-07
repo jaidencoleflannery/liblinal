@@ -7,7 +7,7 @@
 
 static bool matrix_tests_add_and_subtract_should_succeed() {
 
-    static float *m1_scalars[3][3] = { 
+    static float m1_scalars[3][3] = { 
         { 0.1f, 1.8994f, 16.42f },
         { 99.4f, 1.8994f, 18.42f },
         { 0.002f, 14.1f, 1.0f },
@@ -16,60 +16,61 @@ static bool matrix_tests_add_and_subtract_should_succeed() {
     LA_Matrix m1 = {
         .rows = 3,
         .columns = 3,
-        .scalars = &m1_scalars[0][0];
+        .data = m1_scalars[0]
     };
 
-    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
-
-    LA_Vector v2 = {
-        .dimension = 3,
-        .l2_norm = 0.0f,
-        .scalars = &v2_scalars[0]
+    static float m2_scalars[3][3] = { 
+        { 44.1f, 1.89f, 3.2f },
+        { 9.4f, 299.4f, 1.42f },
+        { 7.2f, 14.1f, 1.4f },
     };
 
-    LA_Vector la_subtract_result = {0};
-    if(!la_subtract(&v1, &v2, &la_subtract_result)) {
-        fprintf(stderr, "- Failed to find result of v1 - v2.\n");
+    LA_Matrix m2 = {
+        .rows = 3,
+        .columns = 3,
+        .data = m2_scalars[0]
+    };
+
+    LA_Matrix la_matrix_subtract_result = {0};
+    if(!la_matrix_subtract(&m1, &m2, &la_matrix_subtract_result)) {
+        fprintf(stderr, "- Failed to find result of m1 - m2.\n");
         return false;
     }  
 
-    float *v1_scalar = v1.scalars;
-    float *v2_scalar = v2.scalars;
-    float *result_scalar = la_subtract_result.scalars;
-    for(int cursor = 0; cursor < (int)la_subtract_result.dimension; cursor++) {
-        float expected = (*v1_scalar - *v2_scalar);
-        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
-            fprintf(stderr, "- Scalar la_subtraction values did not match.\n");
-            return false;
+    float *m1_data = m1.data;
+    float *m2_data = m2.data;
+    float *result_data = la_matrix_subtract_result.data;
+    int columns = m1.columns;
+    for(int row = 0; row < m1.rows; row++) {
+        int offset = row * columns;
+        for(int column = 0; column < m1.columns; column++) {
+            float expected = *(m1_data + offset + column) - *(m2_data + offset + column);
+            if(fabs(*(result_data + offset + column) - expected) > (EPSILON * fabs(expected))) {
+                fprintf(stderr, "- Matrix subtraction values did not match.\n");
+                return false;
+            }
         }
-
-        ++result_scalar;
-        ++v1_scalar;
-        ++v2_scalar;
     }
 
-    LA_Vector la_add_result = {0};
-    if(!la_add(&v1, &v2, &la_add_result)) {
-        fprintf(stderr, "- Failed to find result of v1 + v2.\n");
+    LA_Matrix la_matrix_add_result = {0};
+    if(!la_matrix_add(&m1, &m2, &la_matrix_add_result)) {
+        fprintf(stderr, "- Failed to find result of m1 + m2.\n");
         return false;
     }
 
-    v1_scalar = v1.scalars;
-    v2_scalar = v2.scalars;
-    result_scalar = la_add_result.scalars;
-    for(int cursor = 0; cursor < (int)la_add_result.dimension; cursor++) {
-        float expected = *v1_scalar + *v2_scalar;
-        if(fabs(*result_scalar - expected) > (EPSILON * fabs(expected))) {
-            fprintf(stderr, "- Scalar addition values did not match.\n");
-            return false;
+    result_data = la_matrix_add_result.data;
+    for(int row = 0; row < m1.rows; row++) {
+        int offset = row * columns;
+        for(int column = 0; column < m1.columns; column++) {
+            float expected = *(m1_data + offset + column) + *(m2_data + offset + column);
+            if(fabs(*(result_data + offset + column) - expected) > (EPSILON * fabs(expected))) {
+                fprintf(stderr, "- Matrix addition values did not match.\n");
+                return false;
+            }
         }
-
-        ++result_scalar;
-        ++v1_scalar;
-        ++v2_scalar;
     }
 
-    printf("+ Test for vector addition and subtraction passed.\n");
+    printf("+ Test for matrix addition and subtraction passed.\n");
     return true;
 }
 

@@ -40,9 +40,9 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
         return false;
     }
 
-    for(size_t row = 0; row < m1->rows; row++) {
-        size_t offset = (row * m1->columns);
-        for(size_t column = 0; column < m1->columns; column++) {
+    for(int row = 0; row < m1->rows; row++) {
+        int offset = (row * m1->columns);
+        for(int column = 0; column < m1->columns; column++) {
              if(!op(m1->data[offset + column], m2->data[offset + column], &(result->data[offset + column]))) {
                  fprintf(stderr, "Failed to perform operation on matrices.");
                  return false;
@@ -133,8 +133,8 @@ bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     } 
 
     // matrix data is contiguous, just check every float.
-    size_t matrix_size = m1->columns * m1->rows;
-    for(size_t cursor  = 0; cursor < matrix_size; cursor++) {
+    int matrix_size = m1->columns * m1->rows;
+    for(int cursor  = 0; cursor < matrix_size; cursor++) {
         float s1 = m1->data[cursor];
         float s2 = m2->data[cursor];
         // if value is 0 or extremely small, relative epsilon doesn't work.

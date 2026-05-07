@@ -43,7 +43,7 @@ typedef struct {
     size_t rows;
     size_t columns;
     // data is row contiguous, step num columns to reach next row.
-    float data[];
+    float *data;
 } LA_Matrix;
 
 // matrix ops.
@@ -58,7 +58,7 @@ bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result);
 
 bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result);
 
-// matrix arithmetic
+// matrix arithmetic.
 
 bool la_matrix_add(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result);
 
