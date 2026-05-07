@@ -111,9 +111,9 @@ static bool matrix_tests_is_equal_should_succeed() {
     for(int row = 0; row < m1.rows; row++) { 
         int offset = row * columns;
         for(int column = 0; column < m1.columns; column++) {
-            if(fabsf(*(m1.data + offset + column) - fabsf(*(m2.data + offset + column)) > (EPSILON))) {
+            if(fabsf(*(m1.data + offset + column)) - fabsf(*(m2.data + offset + column)) > EPSILON) {
                 fprintf(stderr, "- Matrix values did not match.\n");
-                return false;
+                local_result = false;
             }
         }
     }
