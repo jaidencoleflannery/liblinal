@@ -48,9 +48,25 @@ typedef struct {
 
 // matrix ops.
 
+bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result);
+
+bool la_matrix_get(LA_Matrix *m, int row, int column, float *result);
+
+bool la_matrix_set(LA_Matrix *m, int row, int column, float value);
+
+bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result);
+
+bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result);
+
 // matrix arithmetic
 
+bool la_matrix_add(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result);
+
+bool la_matrix_subtract(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result);
+
 bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result);
+
+bool la_matrix_hadamard(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result);
 
 // random.
 

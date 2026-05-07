@@ -121,15 +121,6 @@ bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
     return true;
 }
 
-bool la_matrix_divide(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
-    if(!arithmetic_op(m1, m2, &divide, result)) {
-        fprintf(stderr, "Failed to perform multiplication on matrices.");
-        return false;
-    }
-
-    return true;
-}
-
 bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     if(m1 == NULL || m2 == NULL || result == NULL) {
         fprintf(stderr, "A provided pointer was NULL.");
@@ -189,6 +180,7 @@ bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
     }
 
     m->data[(row * m->columns) + column] = value;
+
     if(m->data[(row * m->columns) + column] == value)
         return true;
     else
@@ -219,7 +211,7 @@ bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
     result->rows = 1;
 
     for(int cursor = 0; cursor < m->columns; cursor++)
-        result->data[cursor] = m->data[(cursor * m->columns) + row];
+        result->data[cursor] = m->data[(row * m->columns) + cursor];
 
     return true;
 }
@@ -248,7 +240,7 @@ bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result) {
 
     // could just cast these column matrices to a vector.
     for(int cursor = 0; cursor < m->columns; cursor++)
-        result->data[cursor] = m->data[(column * m->rows) + cursor];
+        result->data[cursor] = m->data[(cursor * m->columns) + column];
 
     return true;
 }
