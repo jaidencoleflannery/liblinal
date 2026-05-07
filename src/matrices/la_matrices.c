@@ -5,41 +5,21 @@
 #include <math.h>
 
 static bool add(float a, float b, float *result) {
-    if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.\n");
-        return false;
-    }
-
     *result = a + b;
     return true;
 }
 
 static bool subtract(float a, float b, float *result) {
-    if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.\n");
-        return false;
-    }
-
     *result = a - b;
     return true;
 }
 
 static bool multiply(float a, float b, float *result) {
-    if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.\n");
-        return false;
-    }
-
     *result = a * b;
     return true;
 }
 
 static bool divide(float a, float b, float *result) {
-    if(result == NULL) {
-        fprintf(stderr, "Provided result pointer was NULL.\n");
-        return false;
-    }
-
     *result = a / b;
     return true;
 }
@@ -60,12 +40,12 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
         return false;
     }
 
-    for(size_t column = 0; column < m1->columns; column++) {
-        size_t offset = (column * m1->rows);
-        for(size_t row = 0; row < m1->rows; row++) {
-             if(!op(m1->data[offset], m2->data[offset], &(result->data[offset]))) {
+    for(size_t row = 0; row < m1->rows; row++) {
+        size_t offset = (row * m1->columns);
+        for(size_t column = 0; column < m1->columns; column++) {
+             if(!op(m1->data[offset + column], m2->data[offset + column], &(result->data[offset + column]))) {
                  fprintf(stderr, "Failed to perform operation on matrices.");
-                return false;
+                 return false;
              }
         }
     }
@@ -91,10 +71,51 @@ bool la_matrix_subtract(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
     return true;
 }
 
-bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
+bool la_matrix_hadamard(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
     if(!arithmetic_op(m1, m2, &multiply, result)) {
-        fprintf(stderr, "Failed to perform multiplication on matrices.");
+        fprintf(stderr, "Failed to perform hadamard multiplication on matrices.");
         return false;
+    }
+
+    return true;
+}
+
+bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) { 
+    if(m1 == NULL || m2 == NULL) {
+        fprintf(stderr, "One of the provided matrix pointers were NULL.\n");
+        return false;
+    }
+
+    if(m1->columns != m2->rows) {
+        fprintf(stderr, "Provided matrices had an invalid row and column length combination, could not multiply.");
+        return false;
+    }
+
+    if(result == NULL) {
+        fprintf(stderr, "Provided result pointer was NULL.\n");
+        return false;
+    }
+
+    free(result);
+    result = malloc(sizeof(LA_Matrix) + (m1->rows * m2->columns * sizeof(float)));
+    if(result == NULL) {
+        fprintf(stderr, "Failed to allocate memory.");
+        return false;
+    }
+
+    float *d1 = m1->data;
+    float *d2 = m2->data;
+
+    int result_cursor = 0;
+    float cache = 0.0f;
+
+    for(int row = 0; row < m1->rows; row++) {
+        for(int cursor = 0; cursor < m2->columns; cursor++) {
+            for(int column = 0; column < m1->columns; column++) {
+                cache += d1[column + (row * m1->columns)] * d2[(column * m2->columns) + cursor];
+            }
+            result->data[row] = cache;
+        }
     }
 
     return true;
@@ -187,16 +208,9 @@ bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
         return false;
     }
 
-    if(result != NULL)
-        free(result);
-    result = malloc(sizeof(LA_Matrix));
+    free(result);
+    result = malloc(sizeof(LA_Matrix) + (m->columns * sizeof(float)));
     if(result == NULL) {
-        fprintf(stderr, "Failed to allocate memory.");
-        return false;
-    }
-
-    result->data = malloc(sizeof(float) * m->columns);
-    if(result->data == NULL) {
         fprintf(stderr, "Failed to allocate memory.");
         return false;
     }
@@ -222,16 +236,9 @@ bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result) {
         return false;
     }
 
-    if(result != NULL)
-        free(result);
-    result = malloc(sizeof(LA_Matrix));
+    free(result);
+    result = malloc(sizeof(LA_Matrix) + (m->rows * sizeof(float)));
     if(result == NULL) {
-        fprintf(stderr, "Failed to allocate memory.");
-        return false;
-    }
-
-    result->data = malloc(sizeof(float) * m->rows);
-    if(result->data == NULL) {
         fprintf(stderr, "Failed to allocate memory.");
         return false;
     }
