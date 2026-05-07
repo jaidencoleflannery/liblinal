@@ -74,6 +74,53 @@ static bool matrix_tests_add_and_subtract_should_succeed() {
     return true;
 }
 
+static bool matrix_tests_is_equal_should_succeed() { 
+    static float m1_scalars[3][3] = { 
+        { 0.1f, 1.8994f, 16.42f },
+        { 99.4f, 1.8994f, 18.42f },
+        { 0.002f, 14.1f, 1.0f },
+    };
+
+    LA_Matrix m1 = {
+        .rows = 3,
+        .columns = 3,
+        .data = m1_scalars[0]
+    };
+
+    static float m2_scalars[3][3] = { 
+        { 44.1f, 1.89f, 3.2f },
+        { 9.4f, 299.4f, 1.42f },
+        { 7.2f, 14.1f, 1.4f },
+    };
+
+    LA_Matrix m2 = {
+        .rows = 3,
+        .columns = 3,
+        .data = m2_scalars[0]
+    };
+
+    bool call_result;
+    if(!la_matrix_is_equal(&m1, &m2, &call_result)) {
+        fprintf(stderr, "- Could not compare matrices, equality check failed.");
+        return false;
+    }
+
+    bool local_result = true;
+    const int columns = m1.columns;
+
+    for(int row = 0; row < m1.rows; row++) { 
+        int offset = row * columns;
+        for(int column = 0; column < m1.columns; column++) {
+            if(fabsf(*(m1.data + offset + column) - fabsf(*(m2.data + offset + column)) > (EPSILON))) {
+                fprintf(stderr, "- Matrix values did not match.\n");
+                return false;
+            }
+        }
+    }
+ 
+    return (call_result == local_result);
+}
+
 bool matrix_tests_ops() {
     if(!matrix_tests_is_equal_should_succeed()) {
         fprintf(stderr, "- Success path for matrix equality tests returned false (failure).\n");
@@ -84,7 +131,7 @@ bool matrix_tests_ops() {
 }
 
 bool matrix_tests_arithmetic() {
-    if(!matrix_tests__add_and_subtract_should_succeed()) {
+    if(!matrix_tests_add_and_subtract_should_succeed()) {
         fprintf(stderr, "- Success path for matrix addition and subtraction tests returned false (failure).\n");
         return false;
     }
