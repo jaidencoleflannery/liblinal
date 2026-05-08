@@ -110,11 +110,12 @@ bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
     float cache = 0.0f;
 
     for(int row = 0; row < m1->rows; row++) {
+        cache = 0.0f;
         for(int cursor = 0; cursor < m2->columns; cursor++) {
             for(int column = 0; column < m1->columns; column++) {
                 cache += d1[column + (row * m1->columns)] * d2[(column * m2->columns) + cursor];
             }
-            result->data[row] = cache;
+            result->data[(row * m1->columns) + cursor] = cache;
         }
     }
 
