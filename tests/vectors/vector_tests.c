@@ -7,20 +7,16 @@
 #include "../../include/liblinal/liblinal.h"
 
 static bool vector_tests_add_should_succeed() {
-    bool result = true;
-
-    float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v1_scalars[0]
+        .scalars = (float[]){ 0.1f, 1.8994f, 16.42f }
     };
 
-    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
     LA_Vector v2 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v2_scalars[0]
+        .scalars = (float[]){ 4.13f, 1.8f, 16.4705f }
     };
 
     float *s1 = v1.scalars;
@@ -28,34 +24,31 @@ static bool vector_tests_add_should_succeed() {
 
     LA_Vector la_vector_add_result = {0};
     if(!la_vector_add(&v1, &v2, &la_vector_add_result)) {
-        fprintf(stderr, "- Failed to find result of v1 + v2.\n");
-        result = false;
-    } else {
-        float *result_scalars = la_vector_add_result.scalars;
-        for(size_t cursor = 0; cursor < la_vector_add_result.dimension; cursor++) {
-            if(result == false)
-                break;
-            float expected = *s1 + *s2;
-            if(fabs(*(result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
-                fprintf(stderr, "- Scalar addition values did not match.\n");
-                result = false;
-                break;
-            }
-
-            ++s1;
-            ++s1;
-        }
+        fprintf(stderr, "- Failed to find result of vector addition.\n");
+        return false;
     }
 
-    if(result)
-        printf("+ Test for vector addition passed.\n");
+    if(la_vector_add_result.dimension != v1.dimension) {
+        fprintf(stderr, "- Vector addition result dimension is invalid.\n");
+        return false;
+    }
 
-    return result;
+    float *result_scalars = la_vector_add_result.scalars;
+    for(size_t cursor = 0; cursor < la_vector_add_result.dimension; cursor++) {
+        float expected = *s1 + *s2;
+        if(fabs(*(result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
+            fprintf(stderr, "- Vector addition values did not match.\n");
+            return false;
+        }
+        ++s1;
+        ++s2;
+    }
+
+    printf("+ Test for vector addition passed.\n");
+    return true;
 }
 
 static bool vector_tests_subtract_should_succeed() {
-    bool result = true;
-
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
@@ -74,35 +67,33 @@ static bool vector_tests_subtract_should_succeed() {
     float *s2 = v2.scalars; 
 
     LA_Vector la_vector_subtract_result = {0};
-    if(!la_vector_add(&v1, &v2, &la_vector_subtract_result)) {
-        fprintf(stderr, "- Failed to find result of v1 - v2.\n");
-        result = false;
-    } else {
-        float *result_scalars = la_vector_subtract_result.scalars;
-        for(size_t cursor = 0; cursor < la_vector_subtract_result.dimension; cursor++) {
-            if(result == false)
-                break;
-            float expected = *s1 - *s2;
-            if(fabs(*(result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
-                fprintf(stderr, "- Scalar subtraction values did not match.\n");
-                result = false;
-                break;
-            }
-
-            ++s1;
-            ++s1;
-        }
+    if(!la_vector_subtract(&v1, &v2, &la_vector_subtract_result)) {
+        fprintf(stderr, "- Failed to find result of vector subtraction.\n");
+        return false;
     }
 
-    if(result)
-        printf("+ Test for vector subtraction passed.\n");
+    if(la_vector_subtract_result.dimension != v1.dimension) {
+        fprintf(stderr, "- Scalar subtraction result dimension is invalid.\n");
+        return false;
+    }
 
-    return result;
+    float *result_scalars = la_vector_subtract_result.scalars;
+    for(size_t cursor = 0; cursor < la_vector_subtract_result.dimension; cursor++) {
+        float expected = *s1 - *s2;
+        if(fabs(*(result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
+            fprintf(stderr, "%f - %f = %f == %f\n", *s1, *s2, expected, *(result_scalars + cursor));
+            fprintf(stderr, "- Scalar subtraction values did not match.\n");
+            return false;
+        }
+        ++s1;
+        ++s2;
+    }
+
+    printf("+ Test for vector subtraction passed.\n");
+    return true;
 }
 
-static bool vector_tests_multiply_and_divide_should_succeed() {
-    bool result = true;
-
+static bool vector_tests_multiply_should_succeed() {
     float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
@@ -122,58 +113,75 @@ static bool vector_tests_multiply_and_divide_should_succeed() {
 
     LA_Vector la_vector_multiply_result = {0};
     if(!la_vector_multiply(&v1, &v2, &la_vector_multiply_result)) {
-        fprintf(stderr, "- Failed to find result of v1 * v2.\n");
-        result = false;
-    } else { 
-        float *result_scalars = la_vector_multiply_result.scalars;
-        for(size_t cursor = 0; cursor < la_vector_multiply_result.dimension; cursor++) {
-            if(result == false)
-                break;
-            float expected = (*s1 * *s2);
-            if(fabs((*result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
-                fprintf(stderr, "- Scalar multiplication values did not match.\n");
-                result = false;
-                break;
-            }
-
-            ++s1;
-            ++s2;
-        }
+        fprintf(stderr, "- Failed to find result of vector multiplication.\n");
+        return false;
     }
 
-    s1 = v1.scalars;
-    s2 = v2.scalars;
-
-    LA_Vector la_vector_divide_result = {0};
-    if(!la_vector_divide(&v1, &v2, &la_vector_divide_result)) {
-        fprintf(stderr, "- Failed to find result of v1 / v2.\n");
-        result = false;
-    } else {
-        float *result_scalars = la_vector_divide_result.scalars;
-        for(size_t cursor = 0; cursor < la_vector_multiply_result.dimension; cursor++) {
-            if(result == false)
-                break;
-            float expected = (*s1 / *s2);
-            if(fabs(*(result_scalars + cursor) - expected) > (EPSILON * fabs(expected))) {
-                fprintf(stderr, "- Scalar division values did not match.\n");
-                result = false;
-                break;
-            }
-
-            ++s1;
-            ++s2;
-        }
+    if(la_vector_multiply_result.dimension != v1.dimension) {
+        fprintf(stderr, "- Vector multiplication result dimension is invalid.\n");
+        return false;
     }
 
-    if(result)
-        printf("+ Test for vector multiplication and division passed.\n");
+    float *result_scalars = la_vector_multiply_result.scalars;
+    for(size_t cursor = 0; cursor < la_vector_multiply_result.dimension; cursor++) {
+        float expected = (*s1 * *s2);
+        if(fabs((*(result_scalars + cursor)) - expected) > (EPSILON * fabs(expected))) { 
+            fprintf(stderr, "- Vector multiplication values did not match.\n");
+            return false;
+        }
+        ++s1;
+        ++s2;
+    }
 
-    return result;
+    printf("+ Test for vector multiplication passed.\n");
+    return true;
+}
+
+static bool vector_tests_division_should_succeed() {
+    float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
+    LA_Vector v1 = {
+        .dimension = 3,
+        .l2_norm = 0.0f,
+        .scalars = &v1_scalars[0]
+    };
+
+    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
+    LA_Vector v2 = {
+        .dimension = 3,
+        .l2_norm = 0.0f,
+        .scalars = &v2_scalars[0]
+    };
+
+    float *s1 = v1.scalars;
+    float *s2 = v2.scalars;
+
+    LA_Vector la_vector_division_result = {0};
+    if(!la_vector_divide(&v1, &v2, &la_vector_division_result)) {
+        fprintf(stderr, "- Failed to find result of vector division.\n");
+        return false;
+    }
+
+    if(la_vector_division_result.dimension != v1.dimension) {
+        fprintf(stderr, "- Vector division result dimension is invalid.\n");
+        return false;
+    }
+
+    float *result_scalars = la_vector_division_result.scalars;
+    for(size_t cursor = 0; cursor < la_vector_division_result.dimension; cursor++) {
+        float expected = (*s1 / *s2);
+        if(fabs((*(result_scalars + cursor)) - expected) > (EPSILON * fabs(expected))) {
+            fprintf(stderr, "- Vector division values did not match.\n");
+            return false;
+        }
+        ++s1;
+        ++s2;
+    }
+
+    printf("+ Test for vector division passed.\n");
+    return true;
 }
 
 static bool vector_tests_is_equal_should_succeed() { 
-    bool result = true;
-
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0,
@@ -188,7 +196,7 @@ static bool vector_tests_is_equal_should_succeed() {
     bool call_result;
     if(!la_vector_is_equal(&v1, &v2, &call_result)) {
         fprintf(stderr, "- Could not compare vectors, equality check failed.");
-        result = false;
+        return false;
     }
 
     bool local_result = true;
@@ -197,15 +205,15 @@ static bool vector_tests_is_equal_should_succeed() {
             local_result = false;
             break;
         }
- 
-    return (result)
-        ? (call_result == local_result)
-        : result;
+
+    const bool result = (call_result == local_result);
+    if(result)
+        printf("+ Test for vector equality passed.\n");
+
+    return result;
 }
 
 static bool vector_tests_get_cross_product_should_succeed() {
-    bool result = true;
-
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0,
@@ -222,29 +230,29 @@ static bool vector_tests_get_cross_product_should_succeed() {
     LA_Vector v_result = {0};
     if(!la_vector_cross(&v1, &v2, &v_result)) {
         fprintf(stderr, "- Could not calculate cross product of vectors, function returned false (failure).");
-        result = false;
-    } else {
-        for(size_t cursor = 0; cursor < v1.dimension; cursor++)
-            if(fabsf(v_result.scalars[cursor] - scalar_results[cursor]) > EPSILON) {
-                fprintf(stderr, "- Cross product values did not match.\n");
-                result = false;
-                break;
-            }
+        return false;
     }
 
-    return result;
+    for(size_t cursor = 0; cursor < v1.dimension; cursor++)
+        if(fabsf(v_result.scalars[cursor] - scalar_results[cursor]) > EPSILON) {
+            fprintf(stderr, "- Cross product values did not match.\n");
+            return false;
+        }
+
+    printf("+ Test for vector cross product passed.\n");
+    return true;
 }
 
 bool vector_tests_ops() {
     bool result = true;
 
     if(!vector_tests_is_equal_should_succeed()) {
-        fprintf(stderr, "- Success path for vector equality tests returned false (failure).\n");
+        fprintf(stderr, "-- Success path for vector equality tests returned false (failure).\n");
         result = false;
     }
 
     if(!vector_tests_get_cross_product_should_succeed()) {
-        fprintf(stderr, "- Success path for vector cross product tests returned false (failure).\n");
+        fprintf(stderr, "-- Success path for vector cross product tests returned false (failure).\n");
         result = false;
     }
  
@@ -254,17 +262,22 @@ bool vector_tests_ops() {
 bool vector_tests_arithmetic() {
     bool result = true;
     if(!vector_tests_add_should_succeed()) {
-        fprintf(stderr, "- Success path for vector addition tests returned false (failure).\n");
+        fprintf(stderr, "-- Success path for vector addition tests returned false (failure).\n");
         result = false;
     }
 
     if(!vector_tests_subtract_should_succeed()) {
-        fprintf(stderr, "- Success path for vector subtraction tests returned false (failure).\n");
+        fprintf(stderr, "-- Success path for vector subtraction tests returned false (failure).\n");
         result = false;
     }
 
-    if(!vector_tests_multiply_and_divide_should_succeed()) {
-        fprintf(stderr, "- Success path for vector multiplication and division returned false (failure).\n");
+    if(!vector_tests_multiply_should_succeed()) {
+        fprintf(stderr, "-- Success path for vector multiplication returned false (failure).\n");
+        result = false;
+    }
+
+    if(!vector_tests_division_should_succeed()) {
+        fprintf(stderr, "-- Success path for vector division returned false (failure).\n");
         result = false;
     }
  
@@ -274,15 +287,11 @@ bool vector_tests_arithmetic() {
 bool run_vector_tests() {
     bool result = true;
 
-    if(!vector_tests_ops()) {
-        fprintf(stderr, "- Vector operation tests returned false (failure).\n");
+    if(!vector_tests_ops())
         result = false;
-    }
 
-    if(!vector_tests_arithmetic()) {
-        fprintf(stderr, "- Vector arithmetic tests returned false (failure).\n");
+    if(!vector_tests_arithmetic())
         result = false;
-    }
  
     return result;
 }
