@@ -49,18 +49,16 @@ static bool vector_tests_add_should_succeed() {
 }
 
 static bool vector_tests_subtract_should_succeed() {
-    float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v1_scalars[0]
+        .scalars = (float[]){ 0.1f, 1.8994f, 16.42f }
     };
 
-    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
     LA_Vector v2 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v2_scalars[0]
+        .scalars = (float[]){ 4.13f, 1.8f, 16.4705f }
     };
 
     float *s1 = v1.scalars;
@@ -94,18 +92,16 @@ static bool vector_tests_subtract_should_succeed() {
 }
 
 static bool vector_tests_multiply_should_succeed() {
-    float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v1_scalars[0]
+        .scalars = (float[]){ 0.1f, 1.8994f, 16.42f }
     };
 
-    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
     LA_Vector v2 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v2_scalars[0]
+        .scalars = (float[]){ 4.13f, 1.8f, 16.4705f }
     };
 
     float *s1 = v1.scalars;
@@ -138,18 +134,16 @@ static bool vector_tests_multiply_should_succeed() {
 }
 
 static bool vector_tests_division_should_succeed() {
-    float v1_scalars[] = { 0.1f, 1.8994f, 16.42f };
     LA_Vector v1 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v1_scalars[0]
+        .scalars = (float[]){ 0.1f, 1.8994f, 16.42f }
     };
 
-    float v2_scalars[] = { 4.13f, 1.8f, 16.4705f };
     LA_Vector v2 = {
         .dimension = 3,
         .l2_norm = 0.0f,
-        .scalars = &v2_scalars[0]
+        .scalars = (float[]){ 4.13f, 1.8f, 16.4705f }
     };
 
     float *s1 = v1.scalars;

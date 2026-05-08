@@ -31,7 +31,7 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
     }
 
     if(m1->rows != m2->rows || m1->columns != m2->columns) {
-        fprintf(stderr, "Provided matrices have differing dimensions, could not add.");
+        fprintf(stderr, "Provided matrices have differing dimensions, could not perform arithmetic operation.");
         return false;
     }
 
@@ -40,13 +40,14 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
         return false;
     }
 
+
     for(size_t row = 0; row < m1->rows; row++) {
         size_t offset = (row * m1->columns);
         for(size_t column = 0; column < m1->columns; column++) {
-             if(!op(m1->data[offset + column], m2->data[offset + column], &(result->data[offset + column]))) {
-                 fprintf(stderr, "Failed to perform operation on matrices.");
-                 return false;
-             }
+            if(!op(m1->data[offset + column], m2->data[offset + column], &(result->data[offset + column]))) { 
+                fprintf(stderr, "Failed to perform operation on matrices.");
+                return false;
+            }
         }
     }
 
@@ -93,13 +94,6 @@ bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
 
     if(result == NULL) {
         fprintf(stderr, "Provided result pointer was NULL.\n");
-        return false;
-    }
-
-    free(result);
-    result = malloc(sizeof(LA_Matrix) + (m1->rows * m2->columns * sizeof(float)));
-    if(result == NULL) {
-        fprintf(stderr, "Failed to allocate memory.");
         return false;
     }
 
@@ -200,10 +194,8 @@ bool la_matrix_get_row(LA_Matrix *m, size_t row, LA_Matrix *result) {
         return false;
     }
 
-    free(result);
-    result = malloc(sizeof(LA_Matrix) + (m->columns * sizeof(float)));
     if(result == NULL) {
-        fprintf(stderr, "Failed to allocate memory.");
+        fprintf(stderr, "Provided matrix result pointer was NULL.");
         return false;
     }
 
@@ -228,10 +220,8 @@ bool la_matrix_get_column(LA_Matrix *m, size_t column, LA_Matrix *result) {
         return false;
     }
 
-    free(result);
-    result = malloc(sizeof(LA_Matrix) + (m->rows * sizeof(float)));
     if(result == NULL) {
-        fprintf(stderr, "Failed to allocate memory.");
+        fprintf(stderr, "Provided matrix result pointer was NULL.");
         return false;
     }
 

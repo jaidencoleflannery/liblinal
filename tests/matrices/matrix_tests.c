@@ -5,39 +5,42 @@
 #include "matrix_tests.h"
 #include "../../include/liblinal/liblinal.h"
 
-static bool matrix_tests_add_should_succeed() {
-    static float m1_scalars[3][3] = { 
-        { 0.1f, 1.8994f, 16.42f },
-        { 99.4f, 1.8994f, 18.42f },
-        { 0.002f, 14.1f, 1.0f },
-    };
-
+static bool matrix_tests_add_should_succeed() { 
     LA_Matrix m1 = {
         .rows = 3,
         .columns = 3,
-        .data = m1_scalars[0]
-    };
-
-    static float m2_scalars[3][3] = { 
-        { 44.1f, 1.89f, 3.2f },
-        { 9.4f, 299.4f, 1.42f },
-        { 7.2f, 14.1f, 1.4f },
+        .data = (float[]){
+            0.1f, 1.8994f, 16.42f,
+            99.4f, 1.8994f, 18.42f,
+            0.002f, 14.1f, 1.0f
+        }
     };
 
     LA_Matrix m2 = {
         .rows = 3,
         .columns = 3,
-        .data = m2_scalars[0]
+        .data = (float[]){
+            44.1f, 1.89f, 3.2f,
+            9.4f, 299.4f, 1.42f,
+            7.2f, 14.1f, 1.4f,
+        }
     };
 
     float *d1 = m1.data;
-    float *d2 = m2.data;
+    float *d2 = m2.data; 
 
     LA_Matrix la_matrix_add_result = {0};
-    if(!la_matrix_add(&m1, &m2, &la_matrix_add_result)) {
-        fprintf(stderr, "- Failed to find result of m1 + m2.\n");
+    la_matrix_add_result.data = malloc(sizeof(float) * 9);
+    if(la_matrix_add_result.data == NULL) {
+        fprintf(stderr, "Failed to allocate memory for matrix addition data.");
         return false;
     }
+
+    if(!la_matrix_add(&m1, &m2, &la_matrix_add_result)) {
+        fprintf(stderr, "- Failed to find result of m1 + m2.\n");
+        free(la_matrix_add_result.data);
+        return false;
+    } 
 
     float *result_data = la_matrix_add_result.data;
     for(size_t row = 0; row < m1.rows; row++) {
@@ -46,46 +49,51 @@ static bool matrix_tests_add_should_succeed() {
             float expected = *(d1 + offset + column) + *(d2 + offset + column);
             if(fabs(*(result_data + offset + column) - expected) > (EPSILON * fabs(expected))) {
                 fprintf(stderr, "- Matrix addition values did not match.\n");
+                free(la_matrix_add_result.data);
                 return false;
             }
         }
     }
 
     printf("+ Test for matrix addition passed.\n");
+    free(la_matrix_add_result.data);
     return true;
 }
 
 static bool matrix_tests_subtract_should_succeed() {
-    static float m1_scalars[3][3] = { 
-        { 0.1f, 1.8994f, 16.42f },
-        { 99.4f, 1.8994f, 18.42f },
-        { 0.002f, 14.1f, 1.0f },
-    };
-
     LA_Matrix m1 = {
         .rows = 3,
         .columns = 3,
-        .data = m1_scalars[0]
-    };
-
-    static float m2_scalars[3][3] = { 
-        { 44.1f, 1.89f, 3.2f },
-        { 9.4f, 299.4f, 1.42f },
-        { 7.2f, 14.1f, 1.4f },
+        .data = (float[]){ 
+            0.1f, 1.8994f, 16.42f,
+            99.4f, 1.8994f, 18.42f,
+            0.002f, 14.1f, 1.0f,
+        }
     };
 
     LA_Matrix m2 = {
         .rows = 3,
         .columns = 3,
-        .data = m2_scalars[0]
+        .data = (float[]){ 
+            44.1f, 1.89f, 3.2f,
+            9.4f, 299.4f, 1.42f,
+            7.2f, 14.1f, 1.4f,
+        }
     };
 
     float *d1 = m1.data;
     float *d2 = m2.data;
 
     LA_Matrix la_matrix_subtract_result = {0};
+    la_matrix_subtract_result.data = malloc(sizeof(float) * 9);
+    if(la_matrix_subtract_result.data == NULL) {
+        fprintf(stderr, "Failed to allocate memory for matrix subtraction data.");
+        return false;
+    }
+
     if(!la_matrix_subtract(&m1, &m2, &la_matrix_subtract_result)) {
         fprintf(stderr, "- Failed to find result of m1 - m2.\n");
+        free(la_matrix_subtract_result.data);
         return false;
     }
 
@@ -96,46 +104,51 @@ static bool matrix_tests_subtract_should_succeed() {
             float expected = *(d1 + offset + column) - *(d2 + offset + column);
             if(fabs(*(result_data + offset + column) - expected) > (EPSILON * fabs(expected))) {
                 fprintf(stderr, "- Matrix subtraction values did not match.\n");
+                free(la_matrix_subtract_result.data);
                 return false;
             }
         }
     }
     
     printf("+ Test for matrix subtraction passed.\n");
+    free(la_matrix_subtract_result.data);
     return true;
 }
 
 static bool matrix_tests_multiply_should_succeed() {
-    static float m1_scalars[3][3] = { 
-        { 0.1f, 1.8994f, 16.42f },
-        { 99.4f, 1.8994f, 18.42f },
-        { 0.002f, 14.1f, 1.0f },
-    };
-
     LA_Matrix m1 = {
         .rows = 3,
         .columns = 3,
-        .data = m1_scalars[0]
-    };
-
-    static float m2_scalars[3][3] = { 
-        { 44.1f, 1.89f, 3.2f },
-        { 9.4f, 299.4f, 1.42f },
-        { 7.2f, 14.1f, 1.4f },
+        .data = (float[]){ 
+            0.1f, 1.8994f, 16.42f,
+            99.4f, 1.8994f, 18.42f,
+            0.002f, 14.1f, 1.0f,
+        }
     };
 
     LA_Matrix m2 = {
         .rows = 3,
         .columns = 3,
-        .data = m2_scalars[0]
+        .data = (float[]){ 
+            44.1f, 1.89f, 3.2f,
+            9.4f, 299.4f, 1.42f,
+            7.2f, 14.1f, 1.4f,
+        }
     }; 
 
     float *d1 = m1.data;
     float *d2 = m2.data;
 
     LA_Matrix la_matrix_multiply_result = {0};
+    la_matrix_multiply_result.data = malloc(sizeof(float) * 9);
+    if(la_matrix_multiply_result.data == NULL) {
+        fprintf(stderr, "Failed to allocate memory for matrix multiplication data.");
+        return false;
+    }
+
     if(!la_matrix_multiply(&m1, &m2, &la_matrix_multiply_result)) {
         fprintf(stderr, "- Failed to find result of m1 * m2.\n");
+        free(la_matrix_multiply_result.data);
         return false;
     }
 
@@ -147,46 +160,51 @@ static bool matrix_tests_multiply_should_succeed() {
                 expected += d1[column + (row * m1.columns)] * d2[(column * m2.columns) + cursor];
             if(fabsf((result_data[(row * m1.columns) + cursor]) - expected) > (EPSILON * fabsf(expected))) {
                 fprintf(stderr, "- Matrix multiplication values did not match.\n");
+                free(la_matrix_multiply_result.data);
                 return false;
             }
         }
     }
 
     printf("+ Test for matrix multiplication passed.\n");
+    free(la_matrix_multiply_result.data);
     return true;
 }
 
 static bool matrix_tests_hadamard_should_succeed() {
-    static float m1_scalars[3][3] = { 
-        { 0.1f, 1.8994f, 16.42f },
-        { 99.4f, 1.8994f, 18.42f },
-        { 0.002f, 14.1f, 1.0f },
-    };
-
     LA_Matrix m1 = {
         .rows = 3,
         .columns = 3,
-        .data = m1_scalars[0]
-    };
-
-    static float m2_scalars[3][3] = { 
-        { 44.1f, 1.89f, 3.2f },
-        { 9.4f, 299.4f, 1.42f },
-        { 7.2f, 14.1f, 1.4f },
+        .data = (float[]){ 
+            0.1f, 1.8994f, 16.42f,
+            99.4f, 1.8994f, 18.42f,
+            0.002f, 14.1f, 1.0f,
+        }
     };
 
     LA_Matrix m2 = {
         .rows = 3,
         .columns = 3,
-        .data = m2_scalars[0]
+        .data = (float[]){ 
+            44.1f, 1.89f, 3.2f,
+            9.4f, 299.4f, 1.42f,
+            7.2f, 14.1f, 1.4f,
+        }
     }; 
 
     float *d1 = m1.data;
     float *d2 = m2.data;
 
     LA_Matrix la_matrix_multiply_result = {0};
+    la_matrix_multiply_result.data = malloc(sizeof(float) * m1.rows * m2.columns);
+    if(la_matrix_multiply_result.data == NULL) {
+        fprintf(stderr, "Failed to allocate memory for matrix hadamard multiplcation data.");
+        return false;
+    }
+
     if(!la_matrix_hadamard(&m1, &m2, &la_matrix_multiply_result)) {
         fprintf(stderr, "- Failed to find result of hadamard m1 * m2.\n");
+        free(la_matrix_multiply_result.data);
         return false;
     }
 
@@ -197,12 +215,14 @@ static bool matrix_tests_hadamard_should_succeed() {
             float expected = *(d1 + offset + column) * *(d2 + offset + column);
             if(fabsf(*(result_data + offset + column) - expected) > (EPSILON * fabsf(expected))) {
                 fprintf(stderr, "- Matrix hadamard multiplication values did not match.\n");
+                free(la_matrix_multiply_result.data);
                 return false;
             }
         }
     }
 
     printf("+ Test for matrix hadamard multiplication passed.\n");
+    free(la_matrix_multiply_result.data);
     return true;
 }
 
@@ -296,6 +316,7 @@ bool matrix_tests_arithmetic() {
 
 bool run_matrix_tests() {
     bool result = true;
+
     if(!matrix_tests_ops())
         result = false;
 
