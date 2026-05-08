@@ -40,9 +40,9 @@ static bool arithmetic_op(LA_Matrix *m1, LA_Matrix *m2, operation op, LA_Matrix 
         return false;
     }
 
-    for(int row = 0; row < m1->rows; row++) {
-        int offset = (row * m1->columns);
-        for(int column = 0; column < m1->columns; column++) {
+    for(size_t row = 0; row < m1->rows; row++) {
+        size_t offset = (row * m1->columns);
+        for(size_t column = 0; column < m1->columns; column++) {
              if(!op(m1->data[offset + column], m2->data[offset + column], &(result->data[offset + column]))) {
                  fprintf(stderr, "Failed to perform operation on matrices.");
                  return false;
@@ -106,13 +106,12 @@ bool la_matrix_multiply(LA_Matrix *m1, LA_Matrix *m2, LA_Matrix *result) {
     float *d1 = m1->data;
     float *d2 = m2->data;
 
-    int result_cursor = 0;
     float cache = 0.0f;
 
-    for(int row = 0; row < m1->rows; row++) {
+    for(size_t row = 0; row < m1->rows; row++) {
         cache = 0.0f;
-        for(int cursor = 0; cursor < m2->columns; cursor++) {
-            for(int column = 0; column < m1->columns; column++) {
+        for(size_t cursor = 0; cursor < m2->columns; cursor++) {
+            for(size_t column = 0; column < m1->columns; column++) {
                 cache += d1[column + (row * m1->columns)] * d2[(column * m2->columns) + cursor];
             }
             result->data[(row * m1->columns) + cursor] = cache;
@@ -134,8 +133,8 @@ bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     } 
 
     // matrix data is contiguous, just check every float.
-    int matrix_size = m1->columns * m1->rows;
-    for(int cursor  = 0; cursor < matrix_size; cursor++) {
+    size_t matrix_size = m1->columns * m1->rows;
+    for(size_t cursor  = 0; cursor < matrix_size; cursor++) {
         float s1 = m1->data[cursor];
         float s2 = m2->data[cursor];
         // if value is 0 or extremely small, relative epsilon doesn't work.
@@ -154,7 +153,7 @@ bool la_matrix_is_equal(LA_Matrix *m1, LA_Matrix *m2, bool *result) {
     return true;
 }
 
-bool la_matrix_get(LA_Matrix *m, int row, int column, float *result) {
+bool la_matrix_get(LA_Matrix *m, size_t row, size_t column, float *result) {
     if(m == NULL || result == NULL) {
         fprintf(stderr, "A provided pointer was NULL");
         return false;
@@ -169,7 +168,7 @@ bool la_matrix_get(LA_Matrix *m, int row, int column, float *result) {
     return true;
 }
 
-bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
+bool la_matrix_set(LA_Matrix *m, size_t row, size_t column, float value) {
     if(m == NULL) {
         fprintf(stderr, "The provided matrix pointer was NULL");
         return false;
@@ -189,7 +188,7 @@ bool la_matrix_set(LA_Matrix *m, int row, int column, float value) {
     return false;
 }
 
-bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
+bool la_matrix_get_row(LA_Matrix *m, size_t row, LA_Matrix *result) {
     if(m == NULL) {
         fprintf(stderr, "The provided matrix pointer was NULL.");
         return false;
@@ -211,13 +210,13 @@ bool la_matrix_get_row(LA_Matrix *m, int row, LA_Matrix *result) {
     result->columns = m->columns;
     result->rows = 1;
 
-    for(int cursor = 0; cursor < m->columns; cursor++)
+    for(size_t cursor = 0; cursor < m->columns; cursor++)
         result->data[cursor] = m->data[(row * m->columns) + cursor];
 
     return true;
 }
 
-bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result) {
+bool la_matrix_get_column(LA_Matrix *m, size_t column, LA_Matrix *result) {
     if(m == NULL) {
         fprintf(stderr, "The provided matrix pointer was NULL.");
         return false;
@@ -240,7 +239,7 @@ bool la_matrix_get_column(LA_Matrix *m, int column, LA_Matrix *result) {
     result->rows = m->rows;
 
     // could just cast these column matrices to a vector.
-    for(int cursor = 0; cursor < m->columns; cursor++)
+    for(size_t cursor = 0; cursor < m->columns; cursor++)
         result->data[cursor] = m->data[(cursor * m->columns) + column];
 
     return true;

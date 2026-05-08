@@ -46,7 +46,7 @@ static bool divide(float a, float b, float *result) {
     return true;
 }
 
-static bool find_largest_scalar_absolute(int dimension, float *scalars, float *largest_scalar) {
+static bool find_largest_scalar_absolute(size_t dimension, float *scalars, float *largest_scalar) {
     if(dimension <= 0) {
         fprintf(stderr, "The parameter dimension must be a positive integer.\n");
         return false;
@@ -63,14 +63,9 @@ static bool find_largest_scalar_absolute(int dimension, float *scalars, float *l
     } 
 
     *largest_scalar = 0.0f;
-    for(int cursor = 0; cursor < dimension; cursor++)
+    for(size_t cursor = 0; cursor < dimension; cursor++)
         if(fabs(*(scalars + cursor)) > *largest_scalar)
             *largest_scalar = fabs(*(scalars + cursor));
-
-    if(*largest_scalar < 0.0f) {
-        fprintf(stderr, "Failed to find largest scalar, result was less than 0.\n");
-        return false;
-    }
 
     return true;
 }
@@ -103,7 +98,6 @@ bool la_vector_calculate_l2_norm(size_t dimension, float *scalars, float *l2_res
     float *scalar_cursor = scalars;
 
     // square and add.
-    // loop with size_t in case of vectors larger than int's max.
     for(size_t cursor = 0; cursor < dimension; cursor++) {
         *l2_result += (*scalar_cursor / largest_scalar) * (*scalar_cursor / largest_scalar);
         ++scalar_cursor;
@@ -140,7 +134,7 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, operation op, LA_Vector 
         return false;
     }
 
-    result->dimension = (int)v1->dimension; 
+    result->dimension = v1->dimension; 
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
@@ -152,7 +146,7 @@ static bool arithmetic_op(LA_Vector *v1, LA_Vector *v2, operation op, LA_Vector 
         return false;
     }
 
-    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
+    for(size_t cursor = 0; cursor < (size_t)v1->dimension; cursor++)
          op(v1_cursor[cursor], v2_cursor[cursor], &result->scalars[cursor]);
 
     float l2_norm;
@@ -191,14 +185,14 @@ bool la_vector_multiply(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
 
 bool la_vector_scale(LA_Vector *v1, float scalar, LA_Vector *result) {
     float *v1_cursor = v1->scalars;
-    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
+    for(size_t cursor = 0; cursor < v1->dimension; cursor++)
         result->scalars[cursor] = (*v1_cursor++ * scalar);
 
     return true;
 }
 
 bool la_vector_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
-    int required_dimension = 3;
+    size_t required_dimension = 3;
 
     if(v1 == NULL || v1->scalars == NULL) {
         fprintf(stderr, "The provided vector pointer {v1} was invalid.\n");
@@ -215,7 +209,7 @@ bool la_vector_cross(LA_Vector *v1, LA_Vector *v2, LA_Vector *result) {
         return false;
     }
 
-    if((int)v1->dimension != required_dimension || (int)v2->dimension != required_dimension) {
+    if(v1->dimension != required_dimension || v2->dimension != required_dimension) {
         fprintf(stderr, "Vectors for cross product calculation must be 3 dimensional.\n");
         return false;
     }
@@ -281,7 +275,7 @@ bool la_vector_dot(LA_Vector *v1, LA_Vector *v2, float *result) {
 
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
-    for(int cursor = 0; cursor < (int)v1->dimension; cursor++)
+    for(size_t cursor = 0; cursor < (size_t)v1->dimension; cursor++)
         *result += (v1_cursor[cursor] * v2_cursor[cursor]);
 
     return true;
@@ -302,7 +296,7 @@ bool la_vector_is_equal(LA_Vector *v1, LA_Vector *v2, bool *result) {
     float *v1_cursor = v1->scalars;
     float *v2_cursor = v2->scalars;
 
-    for(int cursor = 0; cursor < (int)v1->dimension; cursor++) {
+    for(size_t cursor = 0; cursor < v1->dimension; cursor++) {
         // floats only store ~6 trustworthy values, if the value grows too large we lose accuracy;
         // epsilon has to be relative to size of diff to cover that :(
         float diff = (fabsf(v1_cursor[cursor] - v2_cursor[cursor]));
