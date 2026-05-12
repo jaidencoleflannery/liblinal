@@ -277,11 +277,167 @@ static bool matrix_tests_is_equal_should_succeed() {
     return result;
 }
 
+static bool matrix_tests_set_should_succeed() {  
+    LA_Matrix m1 = {
+        .rows = 3,
+        .columns = 3,
+        .data = (float[]){ 
+            0.1f,   1.894f, 16.42f,
+            99.4f,  1.894f, 18.42f,
+            0.002f, 14.1f,  1.000f
+        }
+    }; 
+
+    LA_Matrix expected_matrix = {
+        .rows = 3,
+        .columns = 3,
+        .data = (float[]){ 
+            0.1f,   9.999f, 16.42f,
+            99.4f,  1.894f, 18.42f,
+            0.002f, 14.1f,  1.000f
+        }
+    };
+
+    if(!la_matrix_set(&m1, 0, 1, 9.999)) {
+        fprintf(stderr, "- Could not set matrix value, set check failed.");
+        return false;
+    }
+
+    bool result = true;
+    for(size_t row = 0; row < m1.rows; row++) { 
+        size_t offset = row * m1.columns;
+        for(size_t column = 0; column < m1.columns; column++) {
+            if(fabsf(*(m1.data + offset + column)) - fabsf(*(expected_matrix.data + offset + column)) > EPSILON) {
+                result = false;
+                break;
+            }
+        }
+    }
+
+    if(result)
+        printf("+ Test for matrix set value passed.\n");
+    else
+        printf("+ Test for matrix set value failed.\n");
+    return result;
+}
+
+static bool matrix_tests_get_row_should_succeed() {
+    LA_Matrix m1 = {
+        .rows = 3,
+        .columns = 3,
+        .data = (float[]){ 
+            0.1f,   1.894f, 16.42f,
+            99.4f,  1.894f, 18.42f,
+            0.002f, 14.1f,  1.000f
+        }
+    }; 
+
+    // expected_row is hardcoded to the second row of m1.
+    LA_Matrix expected_matrix = {
+        .rows = 1,
+        .columns = m1.columns,
+        .data = m1.data + m1.columns
+    };
+
+    LA_Matrix *testing_matrix = malloc(sizeof(expected_matrix));
+    testing_matrix->data = malloc(sizeof(float) * 3);
+
+    if(!la_matrix_get_row(&m1, 1, testing_matrix)) {
+        fprintf(stderr, "- Could not get matrix row, get check failed.");
+        return false;
+    }
+
+    if(testing_matrix->rows > 1) {
+        fprintf(stderr, "- Result of get had an invalid number of rows, get check failed.");
+        return false;
+    } 
+
+    bool result = true;
+    for(size_t column = 0; column < m1.columns; column++)
+        if(fabsf(*(testing_matrix->data + column)) - fabsf(*(expected_matrix.data + column)) > EPSILON) {
+            fprintf(stderr, "%f - %f\n", fabsf(*(testing_matrix->data + column)), fabsf(*(expected_matrix.data + column)));
+            result = false;
+            break;
+        }
+
+    free(testing_matrix->data);
+    free(testing_matrix);
+    (result)
+        ? fprintf(stderr, "+ Test for matrix get row passed.\n")
+        : fprintf(stderr, "- Test for matrix get row failed.\n");
+    return result;
+}
+
+static bool matrix_tests_get_column_should_succeed() {  
+    LA_Matrix m1 = {
+        .rows = 3,
+        .columns = 3,
+        .data = (float[]){ 
+            0.1f,   1.894f, 16.42f,
+            99.4f,  1.894f, 18.42f,
+            0.002f, 14.1f,  1.000f
+        }
+    }; 
+
+    // expected_row is hardcoded to the second column of m1.
+    LA_Matrix expected_matrix = {
+        .rows = 1,
+        .columns = 1,
+        .data = (float[]){ 
+            1.894f, 
+            1.894f, 
+            14.1f 
+        }
+    };
+
+    LA_Matrix *testing_matrix = malloc(sizeof(LA_Matrix));
+    testing_matrix->data = malloc(sizeof(float) * 3);
+
+    if(!la_matrix_get_column(&m1, 1, testing_matrix)) {
+        fprintf(stderr, "- Could not get matrix column, get check failed.");
+        return false;
+    }
+
+    if(testing_matrix->columns > 1) {
+        fprintf(stderr, "- Result of get column had an invalid number of columns, get check failed.");
+        return false;
+    }
+
+    bool result = true;
+    for(size_t row = 0; row < expected_matrix.rows; row++)
+        if(fabsf(*(testing_matrix->data + row)) - fabsf(*(expected_matrix.data + row)) > EPSILON) {
+            result = false;
+            break;
+        }
+
+    free(testing_matrix->data);
+    free(testing_matrix);
+    (result)
+        ? fprintf(stderr, "+ Test for matrix get column passed.\n")
+        : fprintf(stderr, "- Test for matrix get column failed.\n");
+    return result;
+}
+
 bool matrix_tests_ops() {
     bool result = true;
 
     if(!matrix_tests_is_equal_should_succeed()) {
         fprintf(stderr, "-- Success path for matrix equality tests returned false (failure).\n");
+        result = false;
+    }
+
+    if(!matrix_tests_set_should_succeed()) {
+        fprintf(stderr, "-- Success path for matrix set tests returned false (failure).\n");
+        result = false;
+    }
+
+    if(!matrix_tests_get_row_should_succeed()) {
+        fprintf(stderr, "-- Success path for matrix get row tests returned false (failure).\n");
+        result = false;
+    }
+
+    if(!matrix_tests_get_column_should_succeed()) {
+        fprintf(stderr, "-- Success path for matrix get column tests returned false (failure).\n");
         result = false;
     }
  
