@@ -5,3 +5,4 @@ this repository is an ongoing research project to explore strategies for efficie
 associated papers will be appended as they're released.
 
 > **status:** in development.
+> all code in this repository is handwritten.
